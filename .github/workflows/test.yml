@@ -42,9 +42,12 @@ jobs:
           echo "$HOME/renode" >> "$GITHUB_PATH"
           pip install -r "$HOME/renode/tests/requirements.txt"
 
+      # Code that spins, as the SMP tests of the kernel do, runs several
+      # times slower than real time in Renode, so the tests get four times
+      # the time their own timeouts allow.
       - name: Run the tests
         run: |
-          west twister --inline-logs \
+          west twister --inline-logs --timeout-multiplier 4 \
             -p cortex_m33/rp2350a/m33_0 -p cortex_m33/rp2350a/m33/smp \
             -p rpi_pico2/rp2350a/m33/smp \
             -T Renode_RP2350 \
