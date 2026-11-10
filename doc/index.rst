@@ -2,11 +2,11 @@
    Copyright (c) 2026 Muhammad Waleed Badar
    SPDX-License-Identifier: Apache-2.0
 
-rp2350_renode
+Renode_RP2350
 #############
 
-.. image:: images/rp2350-renode-banner.svg
-   :alt: rp2350_renode: both cores of the RP2350, in Renode
+.. image:: images/renode-rp2350-banner.svg
+   :alt: Renode_RP2350: both cores of the RP2350, in Renode
    :width: 720
    :align: center
 

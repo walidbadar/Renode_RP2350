@@ -4,10 +4,16 @@
 # The west manifest of the workspace this repository is built in, after the
 # Zephyr example application:
 #
-#   west init -m https://github.com/walidbadar/rp2350_renode --mr main my-workspace
+#   west init -m https://github.com/walidbadar/Renode_RP2350 --mr main my-workspace
 #   cd my-workspace && west update
 #
-# Zephyr comes in with the two modules a build for the RP2350 needs.
+# Zephyr comes in with the two modules a build for the RP2350 needs. It is
+# pinned to the head of the pull request that adds SMP for Cortex-M,
+#
+#   https://github.com/zephyrproject-rtos/zephyr/pull/124714
+#
+# on which the SMP support for the RP2350 in soc/ is built. Go back to a
+# release once that is merged.
 manifest:
   remotes:
     - name: zephyrproject-rtos
@@ -16,7 +22,7 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: v4.5.0
+      revision: 832b25c7760b222323f4f11c944284083f66e46d
       import:
         name-allowlist:
           - cmsis_6

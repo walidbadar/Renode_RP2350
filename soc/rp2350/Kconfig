@@ -1,0 +1,14 @@
+# Copyright (c) 2026 Muhammad Waleed Badar
+# SPDX-License-Identifier: Apache-2.0
+
+# What the RP2350 has to provide for Zephyr to run on both of its
+# Cortex-M33 cores, on top of the Cortex-M SMP support of
+# https://github.com/zephyrproject-rtos/zephyr/pull/124714
+config RP2350_SMP
+	bool
+	default y
+	depends on SOC_SERIES_RP2350 && CPU_CORTEX_M33
+	depends on SMP || MP_MAX_NUM_CPUS > 1
+	select SOC_PER_CORE_INIT_HOOK
+	select SCHED_IPI_SUPPORTED if SMP
+	select ARCH_HAS_DIRECTED_IPIS if SMP

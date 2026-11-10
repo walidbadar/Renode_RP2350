@@ -5,7 +5,7 @@ common:
   integration_platforms:
     - cortex_m33/rp2350a/m33_0
 tests:
-  rp2350_renode.peripherals:
+  renode_rp2350.peripherals:
     harness: robot
     harness_config:
       robot_testsuite: peripherals.robot

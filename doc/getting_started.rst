@@ -23,22 +23,24 @@ This repository is a Zephyr module and the manifest repository of a west
 workspace, laid out like the Zephyr
 `example application <https://github.com/zephyrproject-rtos/example-application>`_.
 ``west.yml`` names Zephyr and the modules that a build for the RP2350
-needs, and ``west`` fetches them:
+needs, and ``west`` fetches them. Zephyr is pinned to the head of
+`pull request 124714 <https://github.com/zephyrproject-rtos/zephyr/pull/124714>`_,
+which adds SMP for Cortex-M and is not merged yet; see :ref:`zephyr-smp`.
 
 .. code-block:: sh
 
-   west init -m https://github.com/walidbadar/rp2350_renode --mr main my-workspace
+   west init -m https://github.com/walidbadar/Renode_RP2350 --mr main my-workspace
    cd my-workspace
    west update
 
-With the repository already cloned, ``west init -l rp2350_renode`` in the
+With the repository already cloned, ``west init -l Renode_RP2350`` in the
 directory above it does the same. The workspace then holds:
 
 .. code-block:: none
 
    my-workspace/
-   ├── rp2350_renode/          this repository
-   ├── zephyr/                 Zephyr 4.5
+   ├── Renode_RP2350/          this repository
+   ├── zephyr/                 Zephyr, at the pull request
    └── modules/hal/
        ├── cmsis_6/
        └── rpi_pico/
@@ -48,11 +50,34 @@ The commands on these pages are run from the top of the workspace.
 The board
 *********
 
-``boards/renode/cortex_m33`` is a Zephyr board for the model: the RP2350A
-laid out like a Pico 2, with the console on UART0 and an LED on GPIO25.
-Images are built for it as ``cortex_m33/rp2350a/m33_0``.
+``boards/renode/cortex_m33`` is a Zephyr board for the model: the
+RP2350A laid out like a Pico 2, with the console on UART0 and an LED on
+GPIO25. It has two variants:
 
-Every build for the board also builds the boot ROM stand-in and leaves it
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Build for
+     - What runs
+   * - ``cortex_m33/rp2350a/m33_0``
+     - Zephyr on core 0. Core 1 stays where the boot ROM parks it until
+       something launches it, as :ref:`sample-zephyr-core1` does.
+   * - ``cortex_m33/rp2350a/m33/smp``
+     - One Zephyr kernel on both cores (``CONFIG_SMP``); see
+       :ref:`zephyr-smp`.
+
+The targets follow Zephyr's naming for the chip: ``rp2350a`` is the SoC,
+``m33_0`` the Cortex-M33 in the first socket, and ``m33`` a Cortex-M33 in
+both, which is what the ``smp`` variant runs on.
+
+The Pico 2 board that Zephyr has gets an SMP variant as well,
+``rpi_pico2/rp2350a/m33/smp``, from ``boards/raspberrypi/rpi_pico2``. Its
+images, and those of the other variants of that board, run on the model
+too.
+
+Every Arm build for the RP2350 in this workspace, for any board, also
+builds the boot ROM stand-in and leaves it
 next to the image, as ``build/zephyr/rp2350_bootrom.elf``. Renode loads the
 ROM into every machine: without it neither core has anything to start from.
 
@@ -61,26 +86,16 @@ Running a sample
 
 .. code-block:: sh
 
-   west build -b cortex_m33/rp2350a/m33_0 rp2350_renode/samples/zephyr_core1
+   west build -b cortex_m33/rp2350a/m33_0 zephyr/samples/hello_world
    west build -t run
 
-starts Renode with the image and prints UART0 in the terminal:
-
-.. code-block:: none
-
-   *** Booting Zephyr OS build v4.5.0 ***
-   Zephyr on core 0
-   worker on core 1
-   ...
-   core 1 answered 5 of 5 requests
-
-Zephyr runs on core 0. Core 1 stays where the boot ROM parks it until
-something launches it; :ref:`sample-zephyr-core1` does. Any other Zephyr
-application is built and run the same way:
+starts Renode with the image and prints UART0 in the terminal. Any Zephyr
+application is built and run the same way, and on both cores with the
+other variant:
 
 .. code-block:: sh
 
-   west build -b cortex_m33/rp2350a/m33_0 zephyr/samples/hello_world -t run
+   west build -p -b cortex_m33/rp2350a/m33/smp zephyr/samples/philosophers -t run
 
 Running another image
 *********************
@@ -90,7 +105,7 @@ Raspberry Pi Pico 2. Set it before the script is included:
 
 .. code-block:: sh
 
-   renode -e '$elf=@build/zephyr/zephyr.elf; include @rp2350_renode/scripts/rpi_pico2.resc; start'
+   renode -e '$elf=@build/zephyr/zephyr.elf; include @Renode_RP2350/scripts/rpi_pico2.resc; start'
 
 This opens a window on UART0. Without a display, keep Renode in the
 terminal and send the UART to a file:
@@ -98,16 +113,16 @@ terminal and send the UART to a file:
 .. code-block:: sh
 
    renode --console --disable-xwt \
-       -e '$elf=@build/zephyr/zephyr.elf; include @rp2350_renode/scripts/rpi_pico2.resc; uart0 CreateFileBackend @uart0.log true; start'
+       -e '$elf=@build/zephyr/zephyr.elf; include @Renode_RP2350/scripts/rpi_pico2.resc; uart0 CreateFileBackend @uart0.log true; start'
 
 The boot ROM stand-in is looked for next to the image, as
 ``rp2350_bootrom.elf``. For an image that was not built for the
-``cortex_m33`` board, one built for ``rpi_pico2/rp2350a/m33`` for instance,
+``cortex_m33`` board, one built for ``rpi_pico2/rp2350a/m33_0`` for instance,
 say where the ROM of some other build is:
 
 .. code-block:: sh
 
-   renode -e '$bootrom=@build/zephyr/rp2350_bootrom.elf; $elf=@/path/to/image.elf; include @rp2350_renode/scripts/rpi_pico2.resc; start'
+   renode -e '$bootrom=@build/zephyr/rp2350_bootrom.elf; $elf=@/path/to/image.elf; include @Renode_RP2350/scripts/rpi_pico2.resc; start'
 
 The image has to be one the chip would boot: an Arm image for the RP2350
 with an image definition (``IMAGE_DEF``) block in its first 4 kB. Zephyr
@@ -125,7 +140,7 @@ the ROM is then looked for:
 
    $platform=@/path/to/my_board.repl
    $bootrom=@/path/to/rp2350_bootrom.elf
-   include @/path/to/rp2350_renode/scripts/rp2350.resc
+   include @/path/to/Renode_RP2350/scripts/rp2350.resc
 
    macro reset
    """
@@ -161,6 +176,12 @@ Repository layout
      - What makes the repository a Zephyr module
    * - ``boards/renode/cortex_m33/``
      - The Zephyr board for the model
+   * - ``boards/raspberrypi/rpi_pico2/``
+     - An SMP variant for Zephyr's Pico 2 board
+   * - ``soc/rp2350/``
+     - What Zephyr needs from the RP2350 to run on both cores
+   * - ``drivers/timer/``
+     - The system timer of the board, a TIMER block instead of SysTick
    * - ``platforms/``
      - ``rp2350.repl``, the chip, and ``rpi_pico2.repl``, the Pico 2 board
    * - ``peripherals/``

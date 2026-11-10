@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Renode_RP2350 logo: a Raspberry Pi Pico board seen from above, with the two
+  cores of its chip picked out. Original artwork for this project,
+  Copyright (c) 2026 Muhammad Waleed Badar, SPDX-License-Identifier: Apache-2.0
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256"
+     role="img" aria-label="Renode_RP2350">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f6fed"/>
+      <stop offset="1" stop-color="#7a3fe0"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#tile)"/>
+  <!-- The board: a Pico seen from above, USB connector at the top -->
+  <rect x="86" y="34" width="84" height="196" rx="8" fill="#1f9d57"/>
+  <!-- Mounting holes -->
+  <g fill="#0f6b39">
+    <circle cx="98" cy="45" r="4"/><circle cx="158" cy="45" r="4"/>
+    <circle cx="98" cy="219" r="4"/><circle cx="158" cy="219" r="4"/>
+  </g>
+  <!-- The pads down both long edges -->
+  <g fill="#f2c94c"><rect x="83" y="52" width="10" height="5" rx="1"/><rect x="83" y="61" width="10" height="5" rx="1"/><rect x="83" y="70" width="10" height="5" rx="1"/><rect x="83" y="79" width="10" height="5" rx="1"/><rect x="83" y="88" width="10" height="5" rx="1"/><rect x="83" y="97" width="10" height="5" rx="1"/><rect x="83" y="106" width="10" height="5" rx="1"/><rect x="83" y="115" width="10" height="5" rx="1"/><rect x="83" y="124" width="10" height="5" rx="1"/><rect x="83" y="133" width="10" height="5" rx="1"/><rect x="83" y="142" width="10" height="5" rx="1"/><rect x="83" y="151" width="10" height="5" rx="1"/><rect x="83" y="160" width="10" height="5" rx="1"/><rect x="83" y="169" width="10" height="5" rx="1"/><rect x="83" y="178" width="10" height="5" rx="1"/><rect x="83" y="187" width="10" height="5" rx="1"/><rect x="83" y="196" width="10" height="5" rx="1"/><rect x="83" y="205" width="10" height="5" rx="1"/><rect x="83" y="214" width="10" height="5" rx="1"/><rect x="163" y="52" width="10" height="5" rx="1"/><rect x="163" y="61" width="10" height="5" rx="1"/><rect x="163" y="70" width="10" height="5" rx="1"/><rect x="163" y="79" width="10" height="5" rx="1"/><rect x="163" y="88" width="10" height="5" rx="1"/><rect x="163" y="97" width="10" height="5" rx="1"/><rect x="163" y="106" width="10" height="5" rx="1"/><rect x="163" y="115" width="10" height="5" rx="1"/><rect x="163" y="124" width="10" height="5" rx="1"/><rect x="163" y="133" width="10" height="5" rx="1"/><rect x="163" y="142" width="10" height="5" rx="1"/><rect x="163" y="151" width="10" height="5" rx="1"/><rect x="163" y="160" width="10" height="5" rx="1"/><rect x="163" y="169" width="10" height="5" rx="1"/><rect x="163" y="178" width="10" height="5" rx="1"/><rect x="163" y="187" width="10" height="5" rx="1"/><rect x="163" y="196" width="10" height="5" rx="1"/><rect x="163" y="205" width="10" height="5" rx="1"/><rect x="163" y="214" width="10" height="5" rx="1"/></g>
+  <!-- USB connector -->
+  <rect x="111" y="24" width="34" height="30" rx="4" fill="#d9dee5"/>
+  <rect x="117" y="24" width="22" height="6" rx="2" fill="#aab2bd"/>
+  <!-- Button and LED -->
+  <rect x="103" y="64" width="16" height="20" rx="3" fill="#f4f6f8"/>
+  <circle cx="111" cy="74" r="4" fill="#aab2bd"/>
+  <rect x="134" y="62" width="9" height="5" rx="1" fill="#b7f5c9"/>
+  <!-- Flash -->
+  <rect x="131" y="78" width="18" height="20" rx="2" fill="#20242b"/>
+  <!-- The RP2350, and in it the two cores -->
+  <rect x="104" y="118" width="48" height="48" rx="4" fill="#20242b"/>
+  <rect x="111" y="134" width="14" height="16" rx="2" fill="#ffffff"/>
+  <rect x="131" y="134" width="14" height="16" rx="2" fill="#ffffff"/>
+  <!-- Crystal and regulator -->
+  <rect x="106" y="184" width="20" height="10" rx="3" fill="#d9dee5"/>
+  <rect x="134" y="180" width="14" height="16" rx="2" fill="#20242b"/>
+</svg>

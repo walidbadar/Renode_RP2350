@@ -1,0 +1,26 @@
+/*
+ * Copyright (c) 2026 Muhammad Waleed Badar
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/*
+ * The Pico 2 as Zephyr has it, from the board directory in the Zephyr tree.
+ * This directory only extends that board, and the path is how a file there
+ * is reached from here: relative to the include directory of Zephyr.
+ */
+#include <../boards/raspberrypi/rpi_pico2/rpi_pico2_rp2350a_m33_0.dts>
+
+/*
+ * One Zephyr kernel on both Cortex-M33 cores. Each core has a SysTick of
+ * its own, which is no use as the one clock of an SMP kernel, so the system
+ * timer is TIMER1, which both cores see. TIMER0 is left to the counter
+ * driver.
+ */
+&systick {
+	status = "disabled";
+};
+
+&timer1 {
+	compatible = "raspberrypi,pico-system-timer";
+	status = "okay";
+};

@@ -17,6 +17,9 @@
  * what the model implements is enabled. Flash is there to run from; no flash
  * controller is chosen, because the model has no chip behind the QSPI
  * interface and its boot ROM stand-in has no flash functions.
+ *
+ * Zephyr runs on core 0. Core 1 stays in the boot ROM until an application
+ * launches it. The smp variant of the board runs Zephyr on both.
  */
 / {
 	model = "RP2350 in Renode";

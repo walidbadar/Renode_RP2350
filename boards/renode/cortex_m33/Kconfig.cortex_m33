@@ -1,5 +1,9 @@
 # Copyright (c) 2026 Muhammad Waleed Badar
 # SPDX-License-Identifier: Apache-2.0
 
+# m33_0 is Zephyr on core 0. smp is on "m33", the name Zephyr has for the
+# chip with a Cortex-M33 in both sockets; the SoC option of that name is
+# deprecated in favour of the one for core 0, which is selected directly.
 config BOARD_CORTEX_M33
-	select SOC_RP2350A_M33_0 if BOARD_CORTEX_M33_RP2350A_M33_0
+	select SOC_RP2350A_M33_0 if BOARD_CORTEX_M33_RP2350A_M33_0 || \
+				    BOARD_CORTEX_M33_RP2350A_M33_SMP

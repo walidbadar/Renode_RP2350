@@ -10,7 +10,7 @@ board. From the top of the :ref:`workspace <workspace>`:
 
 .. code-block:: sh
 
-   west twister -p cortex_m33/rp2350a/m33_0 -T rp2350_renode
+   west twister -p cortex_m33/rp2350a/m33_0 -T Renode_RP2350
 
 Twister builds each test, starts it in Renode and puts the logs and the
 reports in ``twister-out``.
@@ -43,25 +43,29 @@ use the boot ROM stand-in, and the bare-metal sample, that are built next
 to it.
 
 Stock Zephyr samples and tests run on the board the same way, with their
-own pass criteria:
+own pass criteria, on either variant. The SMP tests of the kernel are the
+ones that show both cores at work under one scheduler:
 
 .. code-block:: sh
 
    west twister -p cortex_m33/rp2350a/m33_0 \
        -T zephyr/samples/hello_world -T zephyr/samples/synchronization
+   west twister -p cortex_m33/rp2350a/m33/smp \
+       -T zephyr/tests/kernel/multiprocessing
 
 To pass options to ``renode-test``, such as ``-n`` to repeat every test,
 start it by hand on a build of the test:
 
 .. code-block:: sh
 
-   west build -b cortex_m33/rp2350a/m33_0 rp2350_renode/tests/multicore
+   west build -b cortex_m33/rp2350a/m33_0 Renode_RP2350/tests/multicore
    renode-test --variable ELF:@$PWD/build/zephyr/zephyr.elf -n 5 \
-       rp2350_renode/tests/multicore/multicore.robot
+       Renode_RP2350/tests/multicore/multicore.robot
 
 Continuous integration
 **********************
 
 ``.github/workflows/test.yml`` sets up the workspace and the Zephyr SDK,
-installs Renode 1.16.0 and runs twister on the tests of this repository
-and on a few stock Zephyr samples.
+installs Renode 1.16.0 and runs twister on both variants of the board: a
+few stock Zephyr samples on each, the tests of this repository on the one
+without SMP, and the SMP tests of the Zephyr kernel on the ``smp`` variant.

@@ -1,0 +1,26 @@
+identifier: rpi_pico2/rp2350a/m33/smp
+name: Raspberry Pi Pico 2 (Cortex-M33, SMP)
+type: mcu
+arch: arm
+flash: 4096
+ram: 520
+toolchain:
+  - zephyr
+  - gnuarmemb
+simulation:
+  - name: renode
+    exec: renode
+testing:
+  ignore_tags:
+    - net
+    - bluetooth
+  renode:
+    uart: sysbus.uart0
+    resc: scripts/rpi_pico2.resc
+supported:
+  - clock
+  - counter
+  - gpio
+  - smp
+  - uart
+  - watchdog

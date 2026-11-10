@@ -1,0 +1,25 @@
+/*
+ * Copyright (c) 2026 Muhammad Waleed Badar
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include "cortex_m33_m33_0.dts"
+
+/*
+ * One Zephyr kernel on both Cortex-M33 cores. Each core has a SysTick of
+ * its own, which is no use as the one clock of an SMP kernel, so the system
+ * timer is TIMER1, which both cores see. TIMER0 is left to the counter
+ * driver.
+ */
+/ {
+	model = "RP2350 in Renode, both cores";
+};
+
+&systick {
+	status = "disabled";
+};
+
+&timer1 {
+	compatible = "raspberrypi,pico-system-timer";
+	status = "okay";
+};

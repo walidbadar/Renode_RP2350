@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          path: rp2350_renode
+          path: Renode_RP2350
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -29,7 +29,7 @@ jobs:
       - name: Set up the west workspace and the Zephyr SDK
         uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
-          app-path: rp2350_renode
+          app-path: Renode_RP2350
           toolchains: arm-zephyr-eabi
 
       # twister starts renode and renode-test from the PATH.
@@ -44,8 +44,11 @@ jobs:
 
       - name: Run the tests
         run: |
-          west twister -p cortex_m33/rp2350a/m33_0 --inline-logs \
-            -T rp2350_renode \
+          west twister --inline-logs \
+            -p cortex_m33/rp2350a/m33_0 -p cortex_m33/rp2350a/m33/smp \
+            -p rpi_pico2/rp2350a/m33/smp \
+            -T Renode_RP2350 \
+            -T zephyr/tests/kernel/multiprocessing \
             -T zephyr/samples/hello_world \
             -T zephyr/samples/synchronization \
             -T zephyr/samples/philosophers

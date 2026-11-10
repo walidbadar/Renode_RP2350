@@ -4,3 +4,6 @@ board:
   vendor: renode
   socs:
     - name: rp2350a
+      variants:
+        - name: smp
+          cpucluster: m33

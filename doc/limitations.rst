@@ -5,7 +5,8 @@
 Limitations and troubleshooting
 ###############################
 
-Tested with Renode 1.16.0 on Linux, with Zephyr 4.5.
+Tested with Renode 1.16.0 on Linux, with Zephyr at the head of
+`pull request 124714 <https://github.com/zephyrproject-rtos/zephyr/pull/124714>`_.
 Nothing here has been compared against a board.
 
 What the model leaves out
@@ -41,6 +42,19 @@ What the model leaves out
   ones are 32 deep with a timeout; Renode's PL011 has no timeout.
 - Dormant mode and the sleep-enable registers of CLOCKS have no effect.
 
+Zephyr on both cores
+********************
+
+This is about the ``smp`` variant of the board.
+
+- SMP for Cortex-M comes from a pull request that is still a draft, and
+  the code for the RP2350 in ``soc/`` has only ever run on this model.
+- Core 0 takes all peripheral interrupts. A driver that enables its
+  interrupt from a thread, which may be running on core 1, would enable it
+  there as well, since each core has its own NVIC; the drivers used here
+  enable theirs while the kernel starts, on core 0.
+- No user mode, which the pull request leaves out for SMP.
+
 What Renode does differently
 ****************************
 
@@ -52,6 +66,12 @@ What Renode does differently
   exclusive access works across the cores regardless.
 - An event from the exclusive-access monitor cannot be modelled; a timed
   event stands in for it. See :doc:`dual_core`.
+- A FIFO or doorbell interrupt that one core raises for the other arrives
+  at the next point where Renode brings the cores into step, at most one
+  quantum later. Renode's NVIC does not cope with an interrupt that
+  arrives from another core's thread while its own core is raising
+  ``BASEPRI``: the core then takes an exception that was never
+  acknowledged, through a vector that does not exist.
 - A core that sleeps in ``WFE`` notices an ``SEV`` from the other core at
   the next point where Renode brings the cores into step, at most one
   quantum later (100 µs by default).

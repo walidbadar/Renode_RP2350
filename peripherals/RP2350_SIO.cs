@@ -309,12 +309,38 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             }
         }
 
+        // The lines of the core that is making the access change at once. The
+        // lines of the other core change at the next point where Renode has
+        // the cores in step, and not from under it while it runs: its NVIC is
+        // not prepared for an interrupt that arrives from another thread just
+        // as the core raises BASEPRI, and has the core take an exception that
+        // nothing was acknowledged for.
         private void UpdateInterrupts()
         {
-            FifoIRQ0.Set(receiveFifo[0].Count > 0 || writeOverflow[0] || readOnEmpty[0]);
-            FifoIRQ1.Set(receiveFifo[1].Count > 0 || writeOverflow[1] || readOnEmpty[1]);
-            DoorbellIRQ0.Set(doorbells[0] != 0);
-            DoorbellIRQ1.Set(doorbells[1] != 0);
+            if(!machine.GetSystemBus(this).TryGetCurrentCPU(out var _))
+            {
+                UpdateInterrupts(0);
+                UpdateInterrupts(1);
+                return;
+            }
+
+            var other = OtherCore;
+            UpdateInterrupts(CurrentCore);
+            machine.LocalTimeSource.ExecuteInNearestSyncedState(_ =>
+            {
+                lock(locker)
+                {
+                    UpdateInterrupts(other);
+                }
+            });
+        }
+
+        private void UpdateInterrupts(int core)
+        {
+            var fifo = receiveFifo[core].Count > 0 || writeOverflow[core] || readOnEmpty[core];
+            var doorbell = doorbells[core] != 0;
+            (core == 0 ? FifoIRQ0 : FifoIRQ1).Set(fifo);
+            (core == 0 ? DoorbellIRQ0 : DoorbellIRQ1).Set(doorbell);
         }
 
         private int CurrentCore

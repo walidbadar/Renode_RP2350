@@ -5,7 +5,7 @@
 Licence
 #######
 
-rp2350_renode is licensed under the Apache-2.0, as Zephyr is. That covers
+Renode_RP2350 is licensed under the Apache-2.0, as Zephyr is. That covers
 the peripheral models, the platform descriptions and scripts, the boot ROM
 stand-in, the Zephyr board, the samples and the tests.
 

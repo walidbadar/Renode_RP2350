@@ -24,8 +24,8 @@ builds it, as ``multicore.elf`` next to an image of its own:
 
 .. code-block:: sh
 
-   west build -b cortex_m33/rp2350a/m33_0 rp2350_renode/tests/multicore
-   renode -e '$elf=@build/zephyr/multicore.elf; include @rp2350_renode/scripts/rpi_pico2.resc; start'
+   west build -b cortex_m33/rp2350a/m33_0 Renode_RP2350/tests/multicore
+   renode -e '$elf=@build/zephyr/multicore.elf; include @Renode_RP2350/scripts/rpi_pico2.resc; start'
 
 .. list-table::
    :header-rows: 1
@@ -58,10 +58,52 @@ builds it, as ``multicore.elf`` next to an image of its own:
 Zephyr
 ******
 
+.. _zephyr-smp:
+
+One kernel on both cores
+========================
+
+The ``smp`` variant of the board, ``cortex_m33/rp2350a/m33/smp``, builds
+Zephyr with ``CONFIG_SMP``: one kernel schedules threads on both cores. Zephyr has no SMP for a Cortex-M yet. The
+workspace takes it from
+`pull request 124714 <https://github.com/zephyrproject-rtos/zephyr/pull/124714>`_,
+a draft that adds it to the architecture code, and this repository adds
+what that asks of the chip:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Needed
+     - On the RP2350
+   * - Which core is this
+     - ``CPUID`` in the SIO
+   * - Start core 1
+     - The launch protocol of the boot ROM, through the FIFO between the
+       cores, with Zephyr's reset vector as the entry point
+   * - Interrupt the other core
+     - Doorbell 0 of the SIO, interrupt 26 on each core
+   * - Atomic operations
+     - ``LDREX`` and ``STREX``, as on one core
+   * - One clock for both cores
+     - TIMER1, in ``drivers/timer``; SysTick is per core and is disabled
+
+The first three are in ``soc/rp2350/smp.c``. Peripheral interrupts are
+taken by core 0, the core that enables them while the drivers start; core 1
+takes only the doorbell.
+
+.. code-block:: sh
+
+   west build -b cortex_m33/rp2350a/m33/smp zephyr/tests/kernel/multiprocessing/smp -t run
+
+runs the SMP tests of the kernel, which among other things check that
+threads really are on two cores at once.
+
 Stock samples
 =============
 
-These run from the Zephyr tree, unchanged, on the ``cortex_m33`` board:
+These run from the Zephyr tree, unchanged, on both variants of the
+``cortex_m33`` board:
 
 .. list-table::
    :header-rows: 1
@@ -72,7 +114,9 @@ These run from the Zephyr tree, unchanged, on the ``cortex_m33`` board:
    * - ``hello_world``
      - Clocks, resets, UART
    * - ``synchronization``
-     - Threads and SysTick timing
+     - Threads and the system timer
+   * - ``philosophers``
+     - Threads, spread over both cores on the ``smp`` variant
    * - ``basic/blinky``
      - GPIO through the GPIO coprocessor, to the LED on GPIO25
    * - ``subsys/shell/shell_module``
@@ -91,14 +135,15 @@ These run from the Zephyr tree, unchanged, on the ``cortex_m33`` board:
 A worker on core 1
 ==================
 
-Zephyr on the RP2350 runs on core 0. ``samples/zephyr_core1`` puts core 1
-to work next to it: it launches a small worker there with the launch
-protocol of the boot ROM and hands it numbers to square through Zephyr's
-driver for the mailbox (``raspberrypi,pico-mbox``).
+``samples/zephyr_core1`` is the other way to use core 1. On the variant
+without SMP, where Zephyr keeps to core 0, it puts core 1 to work next to
+it: it launches a small worker there with the launch protocol of the boot ROM and
+hands it numbers to square through Zephyr's driver for the mailbox
+(``raspberrypi,pico-mbox``).
 
 .. code-block:: none
 
-   *** Booting Zephyr OS build v4.5.0 ***
+   *** Booting Zephyr OS build 832b25c7760b ***
    Zephyr on core 0
    worker on core 1
    1 squared is 1
@@ -113,4 +158,4 @@ own, calls nothing in the kernel and takes no interrupts.
 
 .. code-block:: sh
 
-   west build -b cortex_m33/rp2350a/m33_0 rp2350_renode/samples/zephyr_core1 -t run
+   west build -b cortex_m33/rp2350a/m33_0 Renode_RP2350/samples/zephyr_core1 -t run
