@@ -18,7 +18,7 @@
     </linearGradient>
   </defs>
   <!-- Logo (viewBox 256x256) scaled to 200x200 -->
-  <g transform="translate(150,60) scale(0.78125)">
+  <g transform="translate(70,60) scale(0.78125)">
     <rect width="256" height="256" rx="56" fill="url(#tile)"/>
     <!-- The board: a Pico seen from above, USB connector at the top -->
     <rect x="86" y="34" width="84" height="196" rx="8" fill="#1f9d57"/>
@@ -47,7 +47,7 @@
     <rect x="134" y="180" width="14" height="16" rx="2" fill="#20242b"/>
   </g>
   <g font-family="DejaVu Sans, Verdana, Arial, sans-serif">
-    <text x="400" y="162" font-size="92" font-weight="700" fill="var(--fg)">Renode_RP2350</text>
-    <text x="404" y="222" font-size="38" fill="var(--fg2)">Both cores of the RP2350, in Renode</text>
+    <text x="320" y="160" font-size="84" font-weight="700" fill="var(--fg)">Renode_RP2350</text>
+    <text x="324" y="220" font-size="38" fill="var(--fg2)">Both cores of the RP2350, in Renode</text>
   </g>
 </svg>
