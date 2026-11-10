@@ -54,6 +54,29 @@ cd my-workspace
 west update
 ```
 
+### Linking to an existing workspace
+
+To use a Zephyr workspace you already have instead, link the repository
+into it and make it the workspace's manifest:
+
+```sh
+cd ~/zephyrproject
+ln -s /path/to/Renode_RP2350 Renode_RP2350
+west config manifest.path Renode_RP2350
+west update zephyr
+```
+
+`west update zephyr` checks out the Zephyr commit that `west.yml` pins, so
+commit or stash any work in `zephyr/` first. Run `west update` without a
+name instead if `cmsis_6` or `hal_rpi_pico` is missing or at another
+revision. While the link is the manifest, only Zephyr and those two modules
+are part of the workspace; to go back:
+
+```sh
+west config manifest.path zephyr
+west update
+```
+
 Zephyr has no SMP for Cortex-M yet. `west.yml` pins Zephyr to the head of
 [zephyr#124714](https://github.com/zephyrproject-rtos/zephyr/pull/124714),
 a draft pull request that adds it, and this repository adds what it needs
@@ -74,6 +97,21 @@ Build an application and run it in Renode, from the top of the workspace:
 ```sh
 west build -b cortex_m33/rp2350a/m33_0 zephyr/samples/hello_world -t run
 west build -p -b cortex_m33/rp2350a/m33/smp zephyr/samples/philosophers -t run
+```
+
+With `CONFIG_SCHED_CPU_MASK`, the synchronization sample pins one of its
+two threads to each core, which shows both cores at work:
+
+```sh
+west build -p -b rpi_pico2/rp2350a/m33/smp zephyr/samples/synchronization -t run -- -DCONFIG_SCHED_CPU_MASK=y
+```
+
+```
+*** Booting Zephyr OS build 832b25c7760b ***
+thread_a: Hello World from cpu 0 on rpi_pico2!
+thread_b: Hello World from cpu 1 on rpi_pico2!
+thread_a: Hello World from cpu 0 on rpi_pico2!
+thread_b: Hello World from cpu 1 on rpi_pico2!
 ```
 
 Run the tests, with `renode-test` on the `PATH`:

@@ -99,6 +99,21 @@ takes only the doorbell.
 runs the SMP tests of the kernel, which among other things check that
 threads really are on two cores at once.
 
+The synchronization sample shows it more simply. With
+``CONFIG_SCHED_CPU_MASK`` it pins one of its two threads to each core:
+
+.. code-block:: sh
+
+   west build -p -b rpi_pico2/rp2350a/m33/smp zephyr/samples/synchronization -t run -- -DCONFIG_SCHED_CPU_MASK=y
+
+.. code-block:: none
+
+   *** Booting Zephyr OS build 832b25c7760b ***
+   thread_a: Hello World from cpu 0 on rpi_pico2!
+   thread_b: Hello World from cpu 1 on rpi_pico2!
+   thread_a: Hello World from cpu 0 on rpi_pico2!
+   thread_b: Hello World from cpu 1 on rpi_pico2!
+
 Stock samples
 =============
 

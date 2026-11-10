@@ -47,6 +47,30 @@ directory above it does the same. The workspace then holds:
 
 The commands on these pages are run from the top of the workspace.
 
+Linking to an existing workspace
+================================
+
+To use a Zephyr workspace you already have instead, link the repository
+into it and make it the workspace's manifest:
+
+.. code-block:: sh
+
+   cd ~/zephyrproject
+   ln -s /path/to/Renode_RP2350 Renode_RP2350
+   west config manifest.path Renode_RP2350
+   west update zephyr
+
+``west update zephyr`` checks out the Zephyr commit that ``west.yml`` pins,
+so commit or stash any work in ``zephyr/`` first. Run ``west update``
+without a name instead if ``cmsis_6`` or ``hal_rpi_pico`` is missing or at
+another revision. While the link is the manifest, only Zephyr and those two
+modules are part of the workspace; to go back:
+
+.. code-block:: sh
+
+   west config manifest.path zephyr
+   west update
+
 The board
 *********
 
