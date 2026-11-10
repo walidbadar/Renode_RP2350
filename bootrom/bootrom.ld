@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2026 Muhammad Waleed Badar
- * SPDX-License-Identifier: GPL-3.0-only
+ * SPDX-License-Identifier: Apache-2.0
  *
  * The ROM is 32 kB at address 0 and has no writable data: its only RAM is
  * the stack that start.S points at BOOTRAM.

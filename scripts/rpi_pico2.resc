@@ -1,16 +1,15 @@
 # Copyright (c) 2026 Muhammad Waleed Badar
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: Apache-2.0
 
 :name: Raspberry Pi Pico 2
-:description: Runs an image on the Pico 2, by default the dual-core sample from this repository.
+:description: Runs an image on the Pico 2.
 
-# To run something else, set $elf first:
+# Set $elf to the image first:
 #
 #   renode -e '$elf=@build/zephyr/zephyr.elf; include @scripts/rpi_pico2.resc; start'
 
 $name?="rpi_pico2"
 $platform?=$ORIGIN/../platforms/rpi_pico2.repl
-$elf?=$ORIGIN/../build/multicore/multicore.elf
 
 include $ORIGIN/rp2350.resc
 

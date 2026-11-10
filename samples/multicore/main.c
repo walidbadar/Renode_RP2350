@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2026 Muhammad Waleed Badar
- * SPDX-License-Identifier: GPL-3.0-only
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Dual-core sample for the RP2350: core 0 brings the chip up, launches
  * core 1 through the boot ROM and then checks, one mechanism at a time,

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2026 Muhammad Waleed Badar
- * SPDX-License-Identifier: GPL-3.0-only
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Boot ROM stand-in for the RP2350 Renode model, core 0 side: find an image
  * the way the silicon ROM does, by its IMAGE_DEF block, enter it, and answer

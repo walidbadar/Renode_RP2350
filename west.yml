@@ -1,0 +1,23 @@
+# Copyright (c) 2026 Muhammad Waleed Badar
+# SPDX-License-Identifier: Apache-2.0
+
+# The west manifest of the workspace this repository is built in, after the
+# Zephyr example application:
+#
+#   west init -m https://github.com/walidbadar/rp2350_renode --mr main my-workspace
+#   cd my-workspace && west update
+#
+# Zephyr comes in with the two modules a build for the RP2350 needs.
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: v4.5.0
+      import:
+        name-allowlist:
+          - cmsis_6
+          - hal_rpi_pico

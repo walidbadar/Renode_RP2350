@@ -1,0 +1,15 @@
+sample:
+  name: Zephyr with a worker on core 1 of the RP2350
+tests:
+  sample.rp2350_renode.zephyr_core1:
+    tags: mbox
+    platform_allow:
+      - cortex_m33/rp2350a/m33_0
+      - rpi_pico2/rp2350a/m33_0
+    integration_platforms:
+      - cortex_m33/rp2350a/m33_0
+    harness: console
+    harness_config:
+      type: one_line
+      regex:
+        - "core 1 answered 5 of 5 requests"

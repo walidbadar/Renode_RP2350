@@ -1,14 +1,14 @@
 ..
    Copyright (c) 2026 Muhammad Waleed Badar
-   SPDX-License-Identifier: GPL-3.0-only
+   SPDX-License-Identifier: Apache-2.0
 
 Samples
 #######
 
-The same question, do two cores work together on this model, is asked three
-times: on bare metal, through the Pico SDK and from Zephyr. The first is
-this project's own reading of the chip. The other two bring code that was
-written against the silicon.
+The same question, do two cores work together on this model, is asked
+twice: on bare metal and from Zephyr. The first is this project's own
+reading of the chip. The second brings code that was written against the
+silicon.
 
 None of the samples has been run on a board.
 
@@ -19,10 +19,13 @@ Bare metal
 brings up the clocks and the UART, launches core 1 and runs eight checks;
 the last line is the verdict.
 
+The sample is not a Zephyr application. The test in ``tests/multicore``
+builds it, as ``multicore.elf`` next to an image of its own:
+
 .. code-block:: sh
 
-   make
-   make run
+   west build -b cortex_m33/rp2350a/m33_0 rp2350_renode/tests/multicore
+   renode -e '$elf=@build/zephyr/multicore.elf; include @rp2350_renode/scripts/rpi_pico2.resc; start'
 
 .. list-table::
    :header-rows: 1
@@ -52,46 +55,13 @@ the last line is the verdict.
      - ``FRCE_OFF.PROC1`` in the PSM; core 1 back in the ROM; a second
        launch
 
-Pico SDK
-********
-
-``samples/pico_sdk`` asks again through the SDK. Start-up, clock set-up and
-everything else that touches the hardware is SDK code:
-``multicore_launch_core1()``, the ``multicore_fifo_*`` functions, a
-``mutex_t``, the doorbell functions, ``sleep_ms()`` on both cores,
-``multicore_lockout_start_blocking()`` and ``multicore_reset_core1()``.
-
-.. code-block:: sh
-
-   make pico-sdk PICO_SDK_PATH=/path/to/pico-sdk
-   renode -e '$elf=@build/pico_sdk/sdk_multicore.elf; include @scripts/rpi_pico2.resc; start'
-
-.. code-block:: none
-
-   RP2350 dual-core sample, Pico SDK
-   core 0: running, core number 0
-   core 1: running, core number 1
-   launch core 1 ............ ok
-   mailbox ping-pong ........ ok
-   mutex .................... ok
-   doorbell ................. ok
-   sleep on both cores ...... ok
-   lockout .................. ok
-   core 1: running, core number 1
-   reset and relaunch ....... ok
-   all 7 checks passed
-
-Built with SDK 2.3.0 and the GCC of the Zephyr SDK. ``picotool`` is not
-needed, because only the ELF file is used.
-
 Zephyr
 ******
 
 Stock samples
 =============
 
-``make zephyr`` builds these from the Zephyr tree, unchanged, for
-``rpi_pico2/rp2350a/m33``:
+These run from the Zephyr tree, unchanged, on the ``cortex_m33`` board:
 
 .. list-table::
    :header-rows: 1
@@ -114,9 +84,7 @@ Stock samples
 
 .. code-block:: sh
 
-   make zephyr ZEPHYR_BASE=~/zephyrproject/zephyr
-
-The images end up in ``build/zephyr/<sample>/zephyr/zephyr.elf``.
+   west build -b cortex_m33/rp2350a/m33_0 zephyr/samples/basic/blinky -t run
 
 .. _sample-zephyr-core1:
 
@@ -141,5 +109,8 @@ driver for the mailbox (``raspberrypi,pico-mbox``).
    core 1 answered 5 of 5 requests
 
 The worker is not a Zephyr thread. It has a stack and a vector table of its
-own, calls nothing in the kernel and takes no interrupts. ``make zephyr``
-builds it along with the stock samples.
+own, calls nothing in the kernel and takes no interrupts.
+
+.. code-block:: sh
+
+   west build -b cortex_m33/rp2350a/m33_0 rp2350_renode/samples/zephyr_core1 -t run

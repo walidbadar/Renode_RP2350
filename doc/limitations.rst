@@ -1,11 +1,11 @@
 ..
    Copyright (c) 2026 Muhammad Waleed Badar
-   SPDX-License-Identifier: GPL-3.0-only
+   SPDX-License-Identifier: Apache-2.0
 
 Limitations and troubleshooting
 ###############################
 
-Tested with Renode 1.16.0 on Linux, with Zephyr at 4.5 and Pico SDK 2.3.0.
+Tested with Renode 1.16.0 on Linux, with Zephyr 4.5.
 Nothing here has been compared against a board.
 
 What the model leaves out
@@ -91,8 +91,9 @@ Nothing on the UART, core 0 at ``rom_no_bootable_image``
     cores, or one without the block is not started.
 
 Renode reports ``PC does not lay in memory or PC and SP are equal to zero`` and halts both cores
-    The boot ROM is not loaded. Run ``make`` and check that the script
-    loads ``build/bootrom/bootrom.elf``.
+    The boot ROM is not loaded. It is built with every image for the
+    ``cortex_m33`` board; check that ``$bootrom`` names it, or that
+    ``rp2350_bootrom.elf`` is next to the image.
 
 A Pico SDK program prints nothing after its first use of ``double``
     See the double-precision coprocessor above.

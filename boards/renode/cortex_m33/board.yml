@@ -1,0 +1,6 @@
+board:
+  name: cortex_m33
+  full_name: RP2350 in Renode
+  vendor: renode
+  socs:
+    - name: rp2350a

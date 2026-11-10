@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2026 Muhammad Waleed Badar
- * SPDX-License-Identifier: GPL-3.0-only
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Addresses and constants shared by the assembly and C halves of the ROM.
  */

@@ -1,6 +1,6 @@
 ..
    Copyright (c) 2026 Muhammad Waleed Badar
-   SPDX-License-Identifier: GPL-3.0-only
+   SPDX-License-Identifier: Apache-2.0
 
 Getting started
 ###############
@@ -10,101 +10,121 @@ Requirements
 
 - `Renode <https://renode.io>`_ 1.16.0. The models are C# files that Renode
   compiles when a script includes them; nothing has to be built into Renode.
-- A bare-metal Arm GCC for the boot ROM stand-in and the sample. The one in
-  the Zephyr SDK is picked up from ``~/zephyr-sdk-*``; otherwise
-  ``arm-none-eabi-gcc`` from the ``PATH`` is used. Set ``CROSS_COMPILE`` to
-  choose another.
-- GNU Make, and Python 3 for the tests.
+- ``west`` and what a Zephyr build needs: CMake, Python 3 and the
+  `Zephyr SDK <https://docs.zephyrproject.org/latest/develop/toolchains/zephyr_sdk.html>`_
+  with the ``arm-zephyr-eabi`` toolchain.
 
-Optional, for the other samples:
+.. _workspace:
 
-- A Zephyr workspace with ``west``, to build the Zephyr samples.
-- The Raspberry Pi Pico SDK. A Zephyr workspace has a copy in
-  ``modules/hal/rpi_pico``.
-
-Building
-********
-
-.. code-block:: sh
-
-   make
-
-builds the boot ROM stand-in (``build/bootrom/bootrom.elf``) and the
-bare-metal dual-core sample (``build/multicore/multicore.elf``). Renode loads
-the ROM into every machine: without it neither core has anything to start
-from.
-
-Running the sample
+The west workspace
 ******************
 
-.. code-block:: sh
-
-   make run
-
-starts Renode with a Raspberry Pi Pico 2 and the dual-core sample, and
-opens a window on UART0. Type ``start`` at the Monitor prompt.
-
-Without a display, keep Renode in the terminal and send the UART to a file:
+This repository is a Zephyr module and the manifest repository of a west
+workspace, laid out like the Zephyr
+`example application <https://github.com/zephyrproject-rtos/example-application>`_.
+``west.yml`` names Zephyr and the modules that a build for the RP2350
+needs, and ``west`` fetches them:
 
 .. code-block:: sh
 
-   renode --console --disable-xwt \
-       -e 'include @scripts/rpi_pico2.resc; uart0 CreateFileBackend @uart0.log true; start'
+   west init -m https://github.com/walidbadar/rp2350_renode --mr main my-workspace
+   cd my-workspace
+   west update
 
-Running another image
-*********************
+With the repository already cloned, ``west init -l rp2350_renode`` in the
+directory above it does the same. The workspace then holds:
 
-``scripts/rpi_pico2.resc`` loads the ELF file named by ``$elf``. Set it
-before the script is included:
+.. code-block:: none
+
+   my-workspace/
+   ├── rp2350_renode/          this repository
+   ├── zephyr/                 Zephyr 4.5
+   └── modules/hal/
+       ├── cmsis_6/
+       └── rpi_pico/
+
+The commands on these pages are run from the top of the workspace.
+
+The board
+*********
+
+``boards/renode/cortex_m33`` is a Zephyr board for the model: the RP2350A
+laid out like a Pico 2, with the console on UART0 and an LED on GPIO25.
+Images are built for it as ``cortex_m33/rp2350a/m33_0``.
+
+Every build for the board also builds the boot ROM stand-in and leaves it
+next to the image, as ``build/zephyr/rp2350_bootrom.elf``. Renode loads the
+ROM into every machine: without it neither core has anything to start from.
+
+Running a sample
+****************
 
 .. code-block:: sh
 
-   renode -e '$elf=@/path/to/image.elf; include @scripts/rpi_pico2.resc; start'
+   west build -b cortex_m33/rp2350a/m33_0 rp2350_renode/samples/zephyr_core1
+   west build -t run
 
-The image has to be one the chip would boot: an Arm image for the RP2350
-with an image definition (``IMAGE_DEF``) block in its first 4 kB. Both the
-Pico SDK and Zephyr produce one. See :ref:`boot-rom` for what the ROM
-stand-in accepts.
-
-Zephyr
-======
-
-Build for the Pico 2 as for the board, and point ``$elf`` at the result:
-
-.. code-block:: sh
-
-   west build -b rpi_pico2/rp2350a/m33 zephyr/samples/hello_world
-   renode -e '$elf=@build/zephyr/zephyr.elf; include @/path/to/rp2350_renode/scripts/rpi_pico2.resc; start'
+starts Renode with the image and prints UART0 in the terminal:
 
 .. code-block:: none
 
    *** Booting Zephyr OS build v4.5.0 ***
-   Hello World! rpi_pico2/rp2350a/m33_0
+   Zephyr on core 0
+   worker on core 1
+   ...
+   core 1 answered 5 of 5 requests
 
 Zephyr runs on core 0. Core 1 stays where the boot ROM parks it until
-something launches it; :ref:`sample-zephyr-core1` does.
-
-Pico SDK
-========
+something launches it; :ref:`sample-zephyr-core1` does. Any other Zephyr
+application is built and run the same way:
 
 .. code-block:: sh
 
-   make pico-sdk PICO_SDK_PATH=/path/to/pico-sdk
-   renode -e '$elf=@build/pico_sdk/sdk_multicore.elf; include @scripts/rpi_pico2.resc; start'
+   west build -b cortex_m33/rp2350a/m33_0 zephyr/samples/hello_world -t run
 
-With ``ZEPHYR_BASE`` set, ``PICO_SDK_PATH`` defaults to the copy of the SDK
-in that workspace.
+Running another image
+*********************
+
+``scripts/rpi_pico2.resc`` loads the ELF file named by ``$elf`` on a
+Raspberry Pi Pico 2. Set it before the script is included:
+
+.. code-block:: sh
+
+   renode -e '$elf=@build/zephyr/zephyr.elf; include @rp2350_renode/scripts/rpi_pico2.resc; start'
+
+This opens a window on UART0. Without a display, keep Renode in the
+terminal and send the UART to a file:
+
+.. code-block:: sh
+
+   renode --console --disable-xwt \
+       -e '$elf=@build/zephyr/zephyr.elf; include @rp2350_renode/scripts/rpi_pico2.resc; uart0 CreateFileBackend @uart0.log true; start'
+
+The boot ROM stand-in is looked for next to the image, as
+``rp2350_bootrom.elf``. For an image that was not built for the
+``cortex_m33`` board, one built for ``rpi_pico2/rp2350a/m33`` for instance,
+say where the ROM of some other build is:
+
+.. code-block:: sh
+
+   renode -e '$bootrom=@build/zephyr/rp2350_bootrom.elf; $elf=@/path/to/image.elf; include @rp2350_renode/scripts/rpi_pico2.resc; start'
+
+The image has to be one the chip would boot: an Arm image for the RP2350
+with an image definition (``IMAGE_DEF``) block in its first 4 kB. Zephyr
+produces one. See :ref:`boot-rom` for what the ROM stand-in accepts.
 
 In a script of your own
 ***********************
 
 ``scripts/rp2350.resc`` is the part to build on. It creates the machine,
 compiles the models, loads ``platforms/rp2350.repl`` and the boot ROM, and
-stops there:
+stops there. ``$bootrom`` has to be set first, or ``$elf``, next to which
+the ROM is then looked for:
 
 .. code-block:: none
 
    $platform=@/path/to/my_board.repl
+   $bootrom=@/path/to/rp2350_bootrom.elf
    include @/path/to/rp2350_renode/scripts/rp2350.resc
 
    macro reset
@@ -135,6 +155,12 @@ Repository layout
 
    * - Path
      - Contents
+   * - ``west.yml``
+     - The manifest of the workspace
+   * - ``zephyr/module.yml``
+     - What makes the repository a Zephyr module
+   * - ``boards/renode/cortex_m33/``
+     - The Zephyr board for the model
    * - ``platforms/``
      - ``rp2350.repl``, the chip, and ``rpi_pico2.repl``, the Pico 2 board
    * - ``peripherals/``
@@ -146,11 +172,9 @@ Repository layout
        ``rpi_pico2.resc`` for the board with an image
    * - ``samples/multicore/``
      - The dual-core checks on bare metal
-   * - ``samples/pico_sdk/``
-     - The dual-core checks through the Pico SDK
    * - ``samples/zephyr_core1/``
      - Zephyr on core 0 with a worker on core 1
    * - ``tests/``
-     - Robot Framework tests for ``renode-test``
+     - The tests that twister runs, with their Robot Framework files
    * - ``doc/``
      - This documentation

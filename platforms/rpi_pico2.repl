@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Muhammad Waleed Badar
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: Apache-2.0
 //
 // Raspberry Pi Pico 2: an RP2350A with the board's one visible peripheral,
 // the green LED on GPIO25. UART0 is on GPIO0 and GPIO1 by default, as on

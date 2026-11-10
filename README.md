@@ -35,28 +35,32 @@ all 8 checks passed
 - Clocks that follow the PLLs and dividers, so SysTick and the timers run
   at the rate the firmware programmed.
 - Stock Zephyr boots on it: console, shell, GPIO, timers, watchdog.
-- The same checks written three ways, against the registers, the Pico SDK
-  and Zephyr, and run by Renode's Robot Framework test runner.
+- A Zephyr board for the model, and tests that Zephyr's twister runs on
+  it: the dual-core checks on bare metal and from Zephyr, and the models
+  one register at a time.
 
 ## Quick start
 
-Renode 1.16.0 and a bare-metal Arm GCC are needed; the one in the Zephyr SDK
-is found on its own.
+Renode 1.16.0, `west` and the Zephyr SDK are needed. The repository is the
+manifest of a west workspace, like the Zephyr example application:
 
 ```sh
-make          # the boot ROM stand-in and the bare-metal sample
-make run      # Renode with a Pico 2 running the sample; type "start"
-make test     # the tests
+west init -m https://github.com/walidbadar/rp2350_renode --mr main my-workspace
+cd my-workspace
+west update
 ```
 
-To run an image of your own, a Zephyr build for instance:
+Build a Zephyr application for the `cortex_m33` board and run it in Renode:
 
 ```sh
-west build -b rpi_pico2/rp2350a/m33 zephyr/samples/hello_world
-renode -e '$elf=@build/zephyr/zephyr.elf; include @/path/to/rp2350_renode/scripts/rpi_pico2.resc; start'
+west build -b cortex_m33/rp2350a/m33_0 rp2350_renode/samples/zephyr_core1 -t run
 ```
 
-## Documentation
+Run the tests, with `renode-test` on the `PATH`:
+
+```sh
+west twister -p cortex_m33/rp2350a/m33_0 -T rp2350_renode
+```
 
 The full documentation is at <https://walidbadar.github.io/rp2350_renode/>.
 
@@ -67,7 +71,7 @@ The full documentation is at <https://walidbadar.github.io/rp2350_renode/>.
   [boot ROM stand-in](https://walidbadar.github.io/rp2350_renode/dual_core.html#the-boot-rom-stand-in) and the launch
   of core 1, the SIO, interrupts, coprocessors and `WFE`.
 - [What is modelled](https://walidbadar.github.io/rp2350_renode/model.html), block by block, and what is not.
-- [Samples](https://walidbadar.github.io/rp2350_renode/samples.html): bare metal, Pico SDK and Zephyr.
+- [Samples](https://walidbadar.github.io/rp2350_renode/samples.html): bare metal and Zephyr.
 - [Testing](https://walidbadar.github.io/rp2350_renode/testing.html),
   [Debugging](https://walidbadar.github.io/rp2350_renode/debugging.html) and
   [Limitations and troubleshooting](https://walidbadar.github.io/rp2350_renode/limitations.html).
@@ -76,6 +80,6 @@ The same pages are in [`doc/`](doc/).
 
 ## Licence
 
-GPL-3.0. The boot ROM stand-in is not the Raspberry Pi boot ROM and shares
+Apache-2.0. The boot ROM stand-in is not the Raspberry Pi boot ROM and shares
 no code with it. See the [licence page](https://walidbadar.github.io/rp2350_renode/licence.html) for
 what comes from elsewhere and for trademarks.

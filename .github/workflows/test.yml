@@ -1,5 +1,5 @@
 # Copyright (c) 2026 Muhammad Waleed Badar
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: Apache-2.0
 
 name: Test
 
@@ -9,21 +9,30 @@ on:
 
 env:
   RENODE_VERSION: "1.16.0"
-  PICO_SDK_VERSION: "2.3.0"
 
 jobs:
   test:
     runs-on: ubuntu-24.04
     steps:
+      # The repository is the manifest repository of a west workspace, which
+      # is the directory above it.
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          path: rp2350_renode
 
-      - name: Install the Arm toolchain
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib cmake
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
+      - name: Set up the west workspace and the Zephyr SDK
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: rp2350_renode
+          toolchains: arm-zephyr-eabi
+
+      # twister starts renode and renode-test from the PATH.
       - name: Install Renode
         run: |
           curl -sSL -o renode.tar.gz \
@@ -31,22 +40,23 @@ jobs:
           mkdir -p "$HOME/renode"
           tar -xf renode.tar.gz -C "$HOME/renode" --strip-components=1
           echo "$HOME/renode" >> "$GITHUB_PATH"
+          pip install -r "$HOME/renode/tests/requirements.txt"
 
-      - name: Build the boot ROM and the bare-metal sample
-        run: make
-
-      - name: Build the Pico SDK sample
-        run: |
-          git clone --depth 1 --branch "${PICO_SDK_VERSION}" https://github.com/raspberrypi/pico-sdk.git "$HOME/pico-sdk"
-          make pico-sdk PICO_SDK_PATH="$HOME/pico-sdk"
-
-      # The Zephyr tests are skipped: their images are not built here.
       - name: Run the tests
-        run: make test
+        run: |
+          west twister -p cortex_m33/rp2350a/m33_0 --inline-logs \
+            -T rp2350_renode \
+            -T zephyr/samples/hello_world \
+            -T zephyr/samples/synchronization \
+            -T zephyr/samples/philosophers
 
       - name: Keep the test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: build/tests
+          name: twister-out
+          path: |
+            twister-out/twister.json
+            twister-out/twister.xml
+            twister-out/**/handler.log
+            twister-out/**/build.log

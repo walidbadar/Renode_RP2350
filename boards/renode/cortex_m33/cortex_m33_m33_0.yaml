@@ -1,0 +1,26 @@
+identifier: cortex_m33/rp2350a/m33_0
+name: RP2350 in Renode (Cortex-M33)
+type: mcu
+arch: arm
+flash: 4096
+ram: 520
+toolchain:
+  - zephyr
+  - gnuarmemb
+simulation:
+  - name: renode
+    exec: renode
+testing:
+  ignore_tags:
+    - net
+    - bluetooth
+  renode:
+    uart: sysbus.uart0
+    resc: boards/renode/cortex_m33/support/cortex_m33.resc
+supported:
+  - clock
+  - counter
+  - gpio
+  - mbox
+  - uart
+  - watchdog

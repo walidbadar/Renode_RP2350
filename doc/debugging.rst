@@ -1,6 +1,6 @@
 ..
    Copyright (c) 2026 Muhammad Waleed Badar
-   SPDX-License-Identifier: GPL-3.0-only
+   SPDX-License-Identifier: Apache-2.0
 
 Debugging
 #########
@@ -18,7 +18,7 @@ and attach to it. The two cores appear as two threads:
 
 .. code-block:: none
 
-   $ arm-zephyr-eabi-gdb build/multicore/multicore.elf
+   $ arm-zephyr-eabi-gdb build/zephyr/multicore.elf
    (gdb) target remote :3333
    (gdb) info threads
      Id   Target Id                 Frame
@@ -35,7 +35,7 @@ to see it by name:
 
 .. code-block:: none
 
-   (gdb) add-symbol-file build/bootrom/bootrom.elf
+   (gdb) add-symbol-file build/zephyr/rp2350_bootrom.elf
 
 Monitor commands work from GDB with ``monitor``, for example
 ``monitor cpu1 PC``.

@@ -1,0 +1,14 @@
+# Copyright (c) 2026 Muhammad Waleed Badar
+# SPDX-License-Identifier: Apache-2.0
+
+# Makes this repository a Zephyr module. It adds no code to an image, only
+# the board in boards/renode/cortex_m33 and the samples and tests for
+# twister.
+name: rp2350_renode
+build:
+  settings:
+    board_root: .
+samples:
+  - samples/zephyr_core1
+tests:
+  - tests

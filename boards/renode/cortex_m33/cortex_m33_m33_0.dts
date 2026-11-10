@@ -1,0 +1,75 @@
+/*
+ * Copyright (c) 2026 Muhammad Waleed Badar
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/dts-v1/;
+
+#include <raspberrypi/rpi_pico/rp2350a.dtsi>
+#include <raspberrypi/rpi_pico/m33.dtsi>
+#include <raspberrypi/partitions_0x0_default.dtsi>
+
+#include "cortex_m33-pinctrl.dtsi"
+
+/*
+ * The RP2350A as the model in this repository has it, laid out like a
+ * Pico 2: the console on UART0 at GPIO0 and GPIO1, an LED on GPIO25. Only
+ * what the model implements is enabled. Flash is there to run from; no flash
+ * controller is chosen, because the model has no chip behind the QSPI
+ * interface and its boot ROM stand-in has no flash functions.
+ */
+/ {
+	model = "RP2350 in Renode";
+	compatible = "renode,cortex-m33";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+		zephyr,code-partition = &code_partition;
+	};
+
+	aliases {
+		led0 = &led0;
+		watchdog0 = &wdt0;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		led0: led_0 {
+			gpios = <&gpio0 25 GPIO_ACTIVE_HIGH>;
+			label = "LED";
+		};
+	};
+};
+
+&flash0 {
+	reg = <0x10000000 DT_SIZE_M(4)>;
+	ranges = <0x0 0x10000000 DT_SIZE_M(4)>;
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&uart0 {
+	current-speed = <115200>;
+	pinctrl-0 = <&uart0_default>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&timer0 {
+	status = "okay";
+};
+
+&wdt0 {
+	status = "okay";
+};
+
+/* The mailbox between the cores; the driver is built with CONFIG_MBOX. */
+&mbox {
+	status = "okay";
+};

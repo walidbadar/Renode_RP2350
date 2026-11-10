@@ -1,6 +1,6 @@
 ..
    Copyright (c) 2026 Muhammad Waleed Badar
-   SPDX-License-Identifier: GPL-3.0-only
+   SPDX-License-Identifier: Apache-2.0
 
 rp2350_renode
 #############
@@ -44,8 +44,9 @@ Features
 - Clocks that follow the PLLs and dividers, so SysTick and the timers run
   at the rate the firmware programmed.
 - Stock Zephyr boots on it: console, shell, GPIO, timers, watchdog.
-- The same checks written three ways, against the registers, the Pico SDK
-  and Zephyr, and run by Renode's Robot Framework test runner.
+- A Zephyr board for the model, and tests that Zephyr's twister runs on
+  it: the dual-core checks on bare metal and from Zephyr, and the models
+  one register at a time.
 
 .. toctree::
    :maxdepth: 2

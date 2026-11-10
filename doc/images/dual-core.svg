@@ -2,7 +2,7 @@
 <!--
   How the two cores of the RP2350 are put together in the model. Original
   artwork for this project,
-  Copyright (c) 2026 Muhammad Waleed Badar, SPDX-License-Identifier: GPL-3.0-only
+  Copyright (c) 2026 Muhammad Waleed Badar, SPDX-License-Identifier: Apache-2.0
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560"
      role="img" aria-label="Block diagram of the dual-core model">

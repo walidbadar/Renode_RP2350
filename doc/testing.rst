@@ -1,63 +1,67 @@
 ..
    Copyright (c) 2026 Muhammad Waleed Badar
-   SPDX-License-Identifier: GPL-3.0-only
+   SPDX-License-Identifier: Apache-2.0
 
 Testing
 #######
 
-The tests are Robot Framework files for ``renode-test``, the test runner
-that comes with Renode.
+The tests are run by twister, Zephyr's test runner, on the ``cortex_m33``
+board. From the top of the :ref:`workspace <workspace>`:
 
 .. code-block:: sh
 
-   make test
+   west twister -p cortex_m33/rp2350a/m33_0 -T rp2350_renode
 
-builds the boot ROM and the bare-metal sample, creates a Python virtual
-environment in ``.venv`` with the packages ``renode-test`` needs, and runs
-every file in ``tests/``. Logs and the HTML report go to ``build/tests``.
+Twister builds each test, starts it in Renode and puts the logs and the
+reports in ``twister-out``.
 
 .. list-table::
    :header-rows: 1
    :widths: 28 72
 
-   * - File
+   * - Test
      - What it runs
-   * - ``multicore.robot``
+   * - ``tests/multicore``
      - The bare-metal sample, with the cores in parallel and taking turns;
        both cores parked in the ROM when there is no image; resets from
        the Monitor, from software, and with core 1 held
-   * - ``peripherals.robot``
+   * - ``tests/peripherals``
      - The models one register at a time, from the Monitor, with no image
        loaded: aliases, resets, the clock tree, timers and alarms, the
        SIO, pins and pin interrupts, BOOTRAM, the PSM and the watchdog
-   * - ``pico_sdk.robot``
-     - The Pico SDK sample
-   * - ``zephyr.robot``
-     - The Zephyr samples, stock and ``zephyr_core1``
+   * - ``samples/zephyr_core1``
+     - Zephyr on core 0 with a worker on core 1, judged by its console
+       output
 
-The tests in the last two files are skipped until their images have been
-built:
+The first two are Robot Framework files, which twister hands to
+``renode-test``, the test runner that comes with Renode. ``renode-test``
+has to be on the ``PATH``; it is next to the ``renode`` executable in a
+portable install, and the Python packages it needs are listed in
+``tests/requirements.txt`` there. Each of the two also builds a Zephyr
+image, because twister wants one, but the Robot files do not run it: they
+use the boot ROM stand-in, and the bare-metal sample, that are built next
+to it.
+
+Stock Zephyr samples and tests run on the board the same way, with their
+own pass criteria:
 
 .. code-block:: sh
 
-   make zephyr ZEPHYR_BASE=~/zephyrproject/zephyr
-   make pico-sdk
-   make test
+   west twister -p cortex_m33/rp2350a/m33_0 \
+       -T zephyr/samples/hello_world -T zephyr/samples/synchronization
 
-To run some of the files, or to pass options to ``renode-test``, such as
-``-n`` to repeat every test:
+To pass options to ``renode-test``, such as ``-n`` to repeat every test,
+start it by hand on a build of the test:
 
 .. code-block:: sh
 
-   make test TESTS=tests/multicore.robot
-   make test TEST_ARGS="-n 5"
-
-``renode-test`` is next to the ``renode`` executable in a portable install;
-the Makefile finds it there.
+   west build -b cortex_m33/rp2350a/m33_0 rp2350_renode/tests/multicore
+   renode-test --variable ELF:@$PWD/build/zephyr/zephyr.elf -n 5 \
+       rp2350_renode/tests/multicore/multicore.robot
 
 Continuous integration
 **********************
 
-``.github/workflows/test.yml`` builds the boot ROM and the samples that
-need no Zephyr workspace, and runs the tests on Renode 1.16.0. The Zephyr
-tests are skipped there.
+``.github/workflows/test.yml`` sets up the workspace and the Zephyr SDK,
+installs Renode 1.16.0 and runs twister on the tests of this repository
+and on a few stock Zephyr samples.

@@ -1,13 +1,16 @@
 # Copyright (c) 2026 Muhammad Waleed Badar
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: Apache-2.0
 #
 # The peripheral models one register at a time, from the Monitor. No image
 # is loaded. Where time has to pass the machine runs with both cores resting
 # in the boot ROM. An access from the Monitor counts as one from core 0.
+#
+# Twister runs this and passes ${ELF}, the image it built. The image is not
+# loaded, but the boot ROM stand-in is found next to it.
 
 *** Variables ***
-${PLATFORM}                   ${CURDIR}/../scripts/rp2350.resc
-${BOARD}                      ${CURDIR}/../platforms/rpi_pico2.repl
+${PLATFORM}                   ${CURDIR}/../../scripts/rp2350.resc
+${BOARD}                      ${CURDIR}/../../platforms/rpi_pico2.repl
 
 # Offsets of the aliases that every block but the SIO has.
 ${XOR}                        0x1000
@@ -32,6 +35,7 @@ ${SIO}                        0xD0000000
 
 *** Keywords ***
 Create Machine
+    Execute Command           $elf=${ELF}
     Execute Script            ${PLATFORM}
 
 Write Register

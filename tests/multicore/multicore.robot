@@ -1,9 +1,14 @@
 # Copyright (c) 2026 Muhammad Waleed Badar
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: Apache-2.0
+#
+# The bare-metal sample in samples/multicore. Twister runs this and passes
+# ${ELF}, the image it built; the sample and the boot ROM stand-in are built
+# next to that image.
 
 *** Variables ***
-${PLATFORM}                   ${CURDIR}/../scripts/rp2350.resc
-${SCRIPT}                     ${CURDIR}/../scripts/rpi_pico2.resc
+${PLATFORM}                   ${CURDIR}/../../scripts/rp2350.resc
+${SCRIPT}                     ${CURDIR}/../../scripts/rpi_pico2.resc
+${SAMPLE}                     ${ELF.replace('zephyr.elf', 'multicore.elf')}
 ${UART}                       sysbus.uart0
 # FRCE_OFF in the PSM block, and the bit in it that holds core 1 in reset.
 ${PSM_FRCE_OFF}               0x40018004
@@ -17,6 +22,7 @@ ${SYSRESETREQ}                0x05FA0004
 
 *** Keywords ***
 Create Machine
+    Execute Command           $elf=${SAMPLE}
     Execute Script            ${SCRIPT}
     Create Terminal Tester    ${UART}
 
@@ -47,6 +53,7 @@ Wait For All Checks
 *** Test Cases ***
 Should Park Both Cores In The Boot ROM Without An Image
     [Documentation]           With nothing to boot, core 0 stops in the ROM and core 1 waits there to be launched.
+    Execute Command           $elf=${SAMPLE}
     Execute Script            ${PLATFORM}
     Execute Command           emulation RunFor "0.001"
 

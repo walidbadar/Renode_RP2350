@@ -2,7 +2,7 @@
 <!--
   rp2350_renode logo: two processor cores side by side, joined by the
   mailbox between them. Original artwork for this project,
-  Copyright (c) 2026 Muhammad Waleed Badar, SPDX-License-Identifier: GPL-3.0-only
+  Copyright (c) 2026 Muhammad Waleed Badar, SPDX-License-Identifier: Apache-2.0
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256"
      role="img" aria-label="rp2350_renode">

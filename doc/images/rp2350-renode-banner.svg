@@ -2,7 +2,7 @@
 <!--
   rp2350_renode banner: the logo (see rp2350-renode-logo.svg) with the
   project name. Original artwork for this project,
-  Copyright (c) 2026 Muhammad Waleed Badar, SPDX-License-Identifier: GPL-3.0-only
+  Copyright (c) 2026 Muhammad Waleed Badar, SPDX-License-Identifier: Apache-2.0
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320"
      role="img" aria-label="rp2350_renode: both cores of the RP2350, in Renode">

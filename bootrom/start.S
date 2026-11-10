@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2026 Muhammad Waleed Badar
- * SPDX-License-Identifier: GPL-3.0-only
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Boot ROM stand-in for the RP2350 Renode model: vectors, the well-known
  * pointers that software looks up in the first words of the ROM, and the

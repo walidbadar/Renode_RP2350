@@ -1,0 +1,11 @@
+common:
+  tags: renode
+  platform_allow:
+    - cortex_m33/rp2350a/m33_0
+  integration_platforms:
+    - cortex_m33/rp2350a/m33_0
+tests:
+  rp2350_renode.multicore:
+    harness: robot
+    harness_config:
+      robot_testsuite: multicore.robot

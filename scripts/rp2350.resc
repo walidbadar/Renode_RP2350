@@ -1,5 +1,5 @@
 # Copyright (c) 2026 Muhammad Waleed Badar
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: Apache-2.0
 
 :name: RP2350
 :description: Raspberry Pi RP2350 with both Cortex-M33 cores and the boot ROM stand-in.
@@ -11,7 +11,11 @@
 
 $name?="rp2350"
 $platform?=$ORIGIN/../platforms/rp2350.repl
-$bootrom?=$ORIGIN/../build/bootrom/bootrom.elf
+
+# The boot ROM stand-in is built with every image for the cortex_m33 board
+# and left next to it as rp2350_bootrom.elf. That is where it is looked for,
+# next to $elf, unless $bootrom says otherwise.
+python "import os; monitor.Parse('$bootrom?=@' + os.path.join(os.path.dirname(str(monitor.GetVariable('elf'))), 'rp2350_bootrom.elf'))"
 
 using sysbus
 mach create $name

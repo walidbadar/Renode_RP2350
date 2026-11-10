@@ -1,0 +1,14 @@
+# Copyright (c) 2026 Muhammad Waleed Badar
+# SPDX-License-Identifier: Apache-2.0
+
+:name: RP2350 in Renode
+:description: Runs a Zephyr image built for the cortex_m33 board.
+
+# Zephyr starts this with $elf set to the image: "west build -t run" does,
+# and so does twister. To start it by hand:
+#
+#   renode -e '$elf=@build/zephyr/zephyr.elf; include @cortex_m33.resc; start'
+
+$name?="cortex_m33"
+
+include $ORIGIN/../../../../scripts/rpi_pico2.resc
