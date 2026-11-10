@@ -1,0 +1,25 @@
+# Copyright (c) 2026 Muhammad Waleed Badar
+# SPDX-License-Identifier: GPL-3.0-only
+
+:name: Raspberry Pi Pico 2
+:description: Runs an image on the Pico 2, by default the dual-core sample from this repository.
+
+# To run something else, set $elf first:
+#
+#   renode -e '$elf=@build/zephyr/zephyr.elf; include @scripts/rpi_pico2.resc; start'
+
+$name?="rpi_pico2"
+$platform?=$ORIGIN/../platforms/rpi_pico2.repl
+$elf?=$ORIGIN/../build/multicore/multicore.elf
+
+include $ORIGIN/rp2350.resc
+
+# The image goes in last on purpose. Renode would start a Cortex-M from the
+# vector table of the last ELF file loaded; the model overrules that, because
+# on the chip both cores always start in the boot ROM.
+macro reset
+"""
+    sysbus LoadELF $bootrom
+    sysbus LoadELF $elf
+"""
+runMacro $reset

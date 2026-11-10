@@ -1,0 +1,52 @@
+# Copyright (c) 2026 Muhammad Waleed Badar
+# SPDX-License-Identifier: GPL-3.0-only
+
+name: Test
+
+on:
+  push:
+  pull_request:
+
+env:
+  RENODE_VERSION: "1.16.0"
+  PICO_SDK_VERSION: "2.3.0"
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install the Arm toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib cmake
+
+      - name: Install Renode
+        run: |
+          curl -sSL -o renode.tar.gz \
+            "https://github.com/renode/renode/releases/download/v${RENODE_VERSION}/renode-${RENODE_VERSION}.linux-portable-dotnet.tar.gz"
+          mkdir -p "$HOME/renode"
+          tar -xf renode.tar.gz -C "$HOME/renode" --strip-components=1
+          echo "$HOME/renode" >> "$GITHUB_PATH"
+
+      - name: Build the boot ROM and the bare-metal sample
+        run: make
+
+      - name: Build the Pico SDK sample
+        run: |
+          git clone --depth 1 --branch "${PICO_SDK_VERSION}" https://github.com/raspberrypi/pico-sdk.git "$HOME/pico-sdk"
+          make pico-sdk PICO_SDK_PATH="$HOME/pico-sdk"
+
+      # The Zephyr tests are skipped: their images are not built here.
+      - name: Run the tests
+        run: make test
+
+      - name: Keep the test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: build/tests

@@ -1,0 +1,14 @@
+# Copyright (c) 2026 Muhammad Waleed Badar
+# SPDX-License-Identifier: GPL-3.0-only
+
+build/
+.venv/
+doc/_build/
+__pycache__/
+
+# Left behind by renode-test when it is run outside "make test"
+/logs/
+/snapshots/
+/log.html
+/report.html
+/robot_output.xml

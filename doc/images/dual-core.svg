@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  How the two cores of the RP2350 are put together in the model. Original
+  artwork for this project,
+  Copyright (c) 2026 Muhammad Waleed Badar, SPDX-License-Identifier: GPL-3.0-only
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560"
+     role="img" aria-label="Block diagram of the dual-core model">
+  <!-- Transparent background: the colours follow the viewer's colour scheme -->
+  <style>
+    text { font-family: DejaVu Sans, Verdana, Arial, sans-serif; fill: #1b1d21; }
+    .title { font-size: 19px; font-weight: 700; }
+    .item { font-size: 15px; }
+    .note { font-size: 14px; fill: #57606a; }
+    .box { fill: #f3f5f8; stroke: #57606a; stroke-width: 1.5; }
+    .core { fill: #e6edff; stroke: #57606a; stroke-width: 1.5; }
+    .sio { fill: #efe6ff; stroke: #57606a; stroke-width: 1.5; }
+    .wire { fill: none; stroke: #57606a; stroke-width: 2; }
+    .head { fill: #57606a; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #ffffff; }
+      .note { fill: #b0b5bd; }
+      .box { fill: #23272e; stroke: #9aa3ad; }
+      .core { fill: #1d2b52; stroke: #9aa3ad; }
+      .sio { fill: #33235a; stroke: #9aa3ad; }
+      .wire { stroke: #9aa3ad; }
+      .head { fill: #9aa3ad; }
+    }
+  </style>
+
+  <!-- Core 0 -->
+  <rect class="core" x="20" y="20" width="250" height="210" rx="12"/>
+  <text class="title" x="145" y="50" text-anchor="middle">Core 0</text>
+  <text class="note" x="145" y="72" text-anchor="middle">Cortex-M33, TrustZone</text>
+  <text class="item" x="40" y="106">NVIC and SysTick of its own</text>
+  <text class="item" x="40" y="132">GPIO coprocessor</text>
+  <text class="item" x="40" y="158">WFE, SEV, exclusive access</text>
+  <text class="item" x="40" y="184">MPU, SAU, FPU, DSP</text>
+  <text class="note" x="40" y="212">boots the image</text>
+
+  <!-- Core 1 -->
+  <rect class="core" x="690" y="20" width="250" height="210" rx="12"/>
+  <text class="title" x="815" y="50" text-anchor="middle">Core 1</text>
+  <text class="note" x="815" y="72" text-anchor="middle">Cortex-M33, TrustZone</text>
+  <text class="item" x="710" y="106">NVIC and SysTick of its own</text>
+  <text class="item" x="710" y="132">GPIO coprocessor</text>
+  <text class="item" x="710" y="158">WFE, SEV, exclusive access</text>
+  <text class="item" x="710" y="184">MPU, SAU, FPU, DSP</text>
+  <text class="note" x="710" y="212">waits to be launched</text>
+
+  <!-- SIO -->
+  <rect class="sio" x="330" y="20" width="300" height="210" rx="12"/>
+  <text class="title" x="480" y="50" text-anchor="middle">SIO</text>
+  <text class="item" x="350" y="84">CPUID: 0 or 1, by who asks</text>
+  <text class="item" x="350" y="110">Mailbox 0 to 1, four words</text>
+  <text class="item" x="350" y="136">Mailbox 1 to 0, four words</text>
+  <text class="item" x="350" y="162">Doorbells, eight each way</text>
+  <text class="item" x="350" y="188">32 spinlocks</text>
+  <text class="item" x="350" y="214">GPIO out, enable and in</text>
+
+  <!-- Register access, both ways -->
+  <path class="wire" d="M280 100H320"/>
+  <path class="head" d="M270 100l12 -6v12z"/>
+  <path class="head" d="M330 100l-12 -6v12z"/>
+  <text class="note" x="300" y="88" text-anchor="middle">bus</text>
+  <path class="wire" d="M640 100H680"/>
+  <path class="head" d="M630 100l12 -6v12z"/>
+  <path class="head" d="M690 100l-12 -6v12z"/>
+  <text class="note" x="660" y="88" text-anchor="middle">bus</text>
+
+  <!-- Mailbox and doorbell interrupts, to each core -->
+  <path class="wire" d="M330 160H282"/>
+  <path class="head" d="M270 160l12 -6v12z"/>
+  <text class="note" x="300" y="182" text-anchor="middle">IRQ</text>
+  <text class="note" x="300" y="199" text-anchor="middle">25, 26</text>
+  <path class="wire" d="M630 160H678"/>
+  <path class="head" d="M690 160l-12 -6v12z"/>
+  <text class="note" x="660" y="182" text-anchor="middle">IRQ</text>
+  <text class="note" x="660" y="199" text-anchor="middle">25, 26</text>
+
+  <!-- Boot ROM: both cores take their reset vector from it -->
+  <rect class="box" x="20" y="300" width="440" height="100" rx="12"/>
+  <text class="title" x="240" y="330" text-anchor="middle">Boot ROM stand-in</text>
+  <text class="item" x="40" y="360">Core 0: find the image definition, enter the image</text>
+  <text class="item" x="40" y="384">Core 1: launch protocol over the mailbox</text>
+  <path class="wire" d="M145 300V242"/>
+  <path class="head" d="M145 230l-6 12h12z"/>
+  <text class="note" x="157" y="278">reset vector</text>
+  <path class="wire" d="M400 300V265H760V242"/>
+  <path class="head" d="M760 230l-6 12h12z"/>
+  <text class="note" x="580" y="257" text-anchor="middle">reset vector</text>
+
+  <!-- PSM -->
+  <rect class="box" x="520" y="300" width="420" height="100" rx="12"/>
+  <text class="title" x="730" y="330" text-anchor="middle">PSM</text>
+  <text class="item" x="540" y="360">Both cores start in the ROM, always</text>
+  <text class="item" x="540" y="384">FRCE_OFF.PROC1 holds core 1 in reset</text>
+  <path class="wire" d="M880 300V242"/>
+  <path class="head" d="M880 230l-6 12h12z"/>
+  <text class="note" x="868" y="278" text-anchor="end">reset</text>
+
+  <!-- Shared peripherals -->
+  <rect class="box" x="20" y="440" width="920" height="100" rx="12"/>
+  <text class="title" x="480" y="470" text-anchor="middle">Shared peripherals</text>
+  <text class="item" x="480" y="498" text-anchor="middle">TIMER0, TIMER1, UART0, UART1, WATCHDOG, IO_BANK0, clocks, resets</text>
+  <text class="note" x="480" y="522" text-anchor="middle">Each interrupt goes to both NVICs; IO_BANK0 has a line and enables per core</text>
+</svg>

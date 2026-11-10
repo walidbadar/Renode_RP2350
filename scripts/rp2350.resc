@@ -1,0 +1,45 @@
+# Copyright (c) 2026 Muhammad Waleed Badar
+# SPDX-License-Identifier: GPL-3.0-only
+
+:name: RP2350
+:description: Raspberry Pi RP2350 with both Cortex-M33 cores and the boot ROM stand-in.
+
+# Creates the machine and loads the boot ROM, nothing else: both cores then
+# sit in the ROM, core 0 for want of an image and core 1 waiting to be
+# launched. Include this from a script that goes on to load an image, the way
+# rpi_pico2.resc does.
+
+$name?="rp2350"
+$platform?=$ORIGIN/../platforms/rp2350.repl
+$bootrom?=$ORIGIN/../build/bootrom/bootrom.elf
+
+using sysbus
+mach create $name
+
+# The models that are not part of Renode. The order matters: a model can only
+# refer to models that were compiled before it.
+include $ORIGIN/../peripherals/RP2350_RegisterBlock.cs
+include $ORIGIN/../peripherals/RP2350_AtomicAlias.cs
+include $ORIGIN/../peripherals/RP2350_SysInfo.cs
+include $ORIGIN/../peripherals/RP2350_BootRam.cs
+include $ORIGIN/../peripherals/RP2350_Pads.cs
+include $ORIGIN/../peripherals/RP2350_IOBank0.cs
+include $ORIGIN/../peripherals/RP2350_SIO.cs
+include $ORIGIN/../peripherals/RP2350_CortexM33.cs
+include $ORIGIN/../peripherals/RP2350_PSM.cs
+include $ORIGIN/../peripherals/RP2350_Resets.cs
+include $ORIGIN/../peripherals/RP2350_Clocks.cs
+include $ORIGIN/../peripherals/RP2350_Ticks.cs
+include $ORIGIN/../peripherals/RP2350_Timer.cs
+include $ORIGIN/../peripherals/RP2350_Watchdog.cs
+
+machine LoadPlatformDescription $platform
+
+showAnalyzer uart0
+
+# Renode runs the macro called "reset" again after every reset of the machine.
+macro reset
+"""
+    sysbus LoadELF $bootrom
+"""
+runMacro $reset
