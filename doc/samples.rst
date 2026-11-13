@@ -86,7 +86,8 @@ what that asks of the chip:
    * - Atomic operations
      - ``LDREX`` and ``STREX``, as on one core
    * - One clock for both cores
-     - TIMER1, in ``drivers/timer``; SysTick is per core and is disabled
+     - TIMER1, with the ``raspberrypi,pico-system-timer`` driver of Zephyr;
+       SysTick is per core and is disabled
 
 The first three are in ``soc/rp2350/smp.c``. Peripheral interrupts are
 taken by core 0, the core that enables them while the drivers start; core 1
@@ -108,7 +109,7 @@ The synchronization sample shows it more simply. With
 
 .. code-block:: none
 
-   *** Booting Zephyr OS build 832b25c7760b ***
+   *** Booting Zephyr OS build c3cd7868d47c ***
    thread_a: Hello World from cpu 0 on rpi_pico2!
    thread_b: Hello World from cpu 1 on rpi_pico2!
    thread_a: Hello World from cpu 0 on rpi_pico2!
@@ -158,7 +159,7 @@ hands it numbers to square through Zephyr's driver for the mailbox
 
 .. code-block:: none
 
-   *** Booting Zephyr OS build 832b25c7760b ***
+   *** Booting Zephyr OS build c3cd7868d47c ***
    Zephyr on core 0
    worker on core 1
    1 squared is 1

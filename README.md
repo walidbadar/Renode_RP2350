@@ -77,10 +77,12 @@ west config manifest.path zephyr
 west update
 ```
 
-Zephyr has no SMP for Cortex-M yet. `west.yml` pins Zephyr to the head of
+Zephyr has no SMP for Cortex-M yet.
 [zephyr#124714](https://github.com/zephyrproject-rtos/zephyr/pull/124714),
-a draft pull request that adds it, and this repository adds what it needs
-from the RP2350.
+a draft pull request, adds it. `west.yml` pins Zephyr to
+[a branch](https://github.com/walidbadar/zephyr/tree/rp2350_smp) that has the
+commits of the pull request for the architecture code on a newer Zephyr,
+and this repository adds what they need from the RP2350.
 
 Three board targets run on the model. They follow Zephyr's naming for the
 RP2350A: `m33_0` is Zephyr on core 0, and `m33` is the chip with a
@@ -107,7 +109,7 @@ west build -p -b rpi_pico2/rp2350a/m33/smp zephyr/samples/synchronization -t run
 ```
 
 ```
-*** Booting Zephyr OS build 832b25c7760b ***
+*** Booting Zephyr OS build c3cd7868d47c ***
 thread_a: Hello World from cpu 0 on rpi_pico2!
 thread_b: Hello World from cpu 1 on rpi_pico2!
 thread_a: Hello World from cpu 0 on rpi_pico2!
@@ -130,7 +132,6 @@ west twister -p cortex_m33/rp2350a/m33/smp -T zephyr/tests/kernel/multiprocessin
 | `boards/renode/cortex_m33/` | The Zephyr board for the model, with its `smp` variant |
 | `boards/raspberrypi/rpi_pico2/` | The `smp` variant of Zephyr's Pico 2 board |
 | `soc/rp2350/` | What Zephyr needs from the RP2350 to run on both cores |
-| `drivers/timer/`, `dts/bindings/` | TIMER as the system timer, instead of the per-core SysTick |
 | `platforms/`, `peripherals/`, `scripts/` | The Renode model: platform descriptions, C# models and scripts |
 | `bootrom/` | The boot ROM stand-in |
 | `samples/`, `tests/` | Samples, and the tests twister runs |

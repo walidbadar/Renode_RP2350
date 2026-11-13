@@ -3,8 +3,6 @@
 
 add_subdirectory_ifdef(CONFIG_RP2350_SMP
   ${ZEPHYR_CURRENT_MODULE_DIR}/soc/rp2350 ${CMAKE_CURRENT_BINARY_DIR}/soc/rp2350)
-add_subdirectory_ifdef(CONFIG_RPI_PICO_SYSTEM_TIMER
-  ${ZEPHYR_CURRENT_MODULE_DIR}/drivers/timer ${CMAKE_CURRENT_BINARY_DIR}/drivers/timer)
 
 # The boot ROM stand-in, which Renode loads into every machine: without it
 # neither core has anything to start from. It is built with every Arm image

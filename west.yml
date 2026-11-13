@@ -7,22 +7,30 @@
 #   west init -m https://github.com/walidbadar/Renode_RP2350 --mr main my-workspace
 #   cd my-workspace && west update
 #
-# Zephyr comes in with the two modules a build for the RP2350 needs. It is
-# pinned to the head of the pull request that adds SMP for Cortex-M,
+# Zephyr comes in with the two modules a build for the RP2350 needs. It has
+# no SMP for Cortex-M yet, on which the SMP support for the RP2350 in soc/
+# is built. The pull request that adds it,
 #
 #   https://github.com/zephyrproject-rtos/zephyr/pull/124714
 #
-# on which the SMP support for the RP2350 in soc/ is built. Go back to a
-# release once that is merged.
+# is older than the driver for the system timer of the Pico, which the SMP
+# variants of the boards use. So Zephyr is pinned to the head of the branch
+# rp2350_smp of
+#
+#   https://github.com/walidbadar/zephyr
+#
+# which has the commits of the pull request for the architecture code on
+# top of the Zephyr commit that brought the driver in. Go back to a release
+# once the pull request is merged.
 manifest:
   remotes:
-    - name: zephyrproject-rtos
-      url-base: https://github.com/zephyrproject-rtos
+    - name: walidbadar
+      url-base: https://github.com/walidbadar
 
   projects:
     - name: zephyr
-      remote: zephyrproject-rtos
-      revision: 832b25c7760b222323f4f11c944284083f66e46d
+      remote: walidbadar
+      revision: c3cd7868d47c15d40faad30fef83023fe6d90951
       import:
         name-allowlist:
           - cmsis_6

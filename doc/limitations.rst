@@ -5,7 +5,8 @@
 Limitations and troubleshooting
 ###############################
 
-Tested with Renode 1.16.0 on Linux, with Zephyr at the head of
+Tested with Renode 1.16.0 on Linux, with Zephyr at the commit that
+``west.yml`` pins, which has the commits for the architecture code of
 `pull request 124714 <https://github.com/zephyrproject-rtos/zephyr/pull/124714>`_.
 Nothing here has been compared against a board.
 

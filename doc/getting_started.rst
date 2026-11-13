@@ -23,9 +23,12 @@ This repository is a Zephyr module and the manifest repository of a west
 workspace, laid out like the Zephyr
 `example application <https://github.com/zephyrproject-rtos/example-application>`_.
 ``west.yml`` names Zephyr and the modules that a build for the RP2350
-needs, and ``west`` fetches them. Zephyr is pinned to the head of
+needs, and ``west`` fetches them. Zephyr is pinned to
+`a branch <https://github.com/walidbadar/zephyr/tree/rp2350_smp>`_ that has
+the commits for the architecture code of
 `pull request 124714 <https://github.com/zephyrproject-rtos/zephyr/pull/124714>`_,
-which adds SMP for Cortex-M and is not merged yet; see :ref:`zephyr-smp`.
+which adds SMP for Cortex-M and is not merged yet, on a newer Zephyr; see
+:ref:`zephyr-smp`.
 
 .. code-block:: sh
 
@@ -40,7 +43,7 @@ directory above it does the same. The workspace then holds:
 
    my-workspace/
    ├── Renode_RP2350/          this repository
-   ├── zephyr/                 Zephyr, at the pull request
+   ├── zephyr/                 Zephyr, with SMP for Cortex-M
    └── modules/hal/
        ├── cmsis_6/
        └── rpi_pico/
@@ -204,8 +207,6 @@ Repository layout
      - An SMP variant for Zephyr's Pico 2 board
    * - ``soc/rp2350/``
      - What Zephyr needs from the RP2350 to run on both cores
-   * - ``drivers/timer/``
-     - The system timer of the board, a TIMER block instead of SysTick
    * - ``platforms/``
      - ``rp2350.repl``, the chip, and ``rpi_pico2.repl``, the Pico 2 board
    * - ``peripherals/``
