@@ -10,21 +10,12 @@ using Antmicro.Renode.Peripherals.IRQControllers;
 
 namespace Antmicro.Renode.Peripherals.Miscellaneous
 {
-    // PSM: the power-on state machine, which is what lets the processors out
-    // of reset.
-    //
-    // Both cores of an RP2350 start from the vector table of the boot ROM at
-    // address 0, always. Renode would rather guess the vector table from the
-    // last ELF file that was loaded, so every time the machine starts or
-    // resumes, the model points the cores that are still in reset at the ROM.
-    //
-    // Software uses the block for one thing on a running system:
-    // FRCE_OFF.PROC1 holds core 1 in reset, and releasing it sends the core
-    // back through the boot ROM, where it waits to be launched again. That is
-    // how a core 1 that has run away is recovered without resetting the chip.
-    //
-    // The other stages are stored and reported as done; forcing them off has
-    // no effect on the model.
+    // PSM: the power-on state machine. Both cores start from the vector table
+    // of the boot ROM at address 0, whichever ELF file was loaded last, so the
+    // cores that are still in reset are pointed at the ROM whenever the machine
+    // starts or resumes. FRCE_OFF.PROC1 holds core 1 in reset; releasing it
+    // sends the core back through the boot ROM. The other stages are stored
+    // only.
     public class RP2350_PSM : RP2350_RegisterBlock, IHasOwnLife
     {
         public RP2350_PSM(IMachine machine, CortexM core0 = null, CortexM core1 = null, NVIC nvic1 = null) : base(machine)
@@ -63,15 +54,13 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithReservedBits(NumberOfStages, 32 - NumberOfStages);
         }
 
-        // The stages a watchdog reset restarts, one bit each.
         public uint WatchdogSelection => (uint)watchdogSelect.Value;
 
         public override void Reset()
         {
             base.Reset();
-            // A reset of the whole machine ends the hold on core 1 as well.
-            // The machine is stopped while it is being reset, so the core is
-            // let go when it starts again.
+            // A machine reset ends the hold on core 1 too. The core is let
+            // go when the machine starts again.
             lock(locker)
             {
                 releaseCore1 = core1Held;
@@ -108,19 +97,17 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                     continue;
                 }
 
-                // A core that has not run since its reset is still free to be
-                // told where to start; one that is running keeps the vector
-                // table its software chose.
+                // A core that is running keeps the vector table its software
+                // chose.
                 if(core.EmulationState == EmulationCPUState.InReset)
                 {
                     core.VectorTableOffset = RomVectorTable;
                 }
 
-                // Renode keeps a per-CPU cache of what each bus access can
-                // reach and creates the entry for a CPU on its first access,
-                // without a lock. Two cores making their first access at the
-                // same moment can corrupt it. One access on behalf of each
-                // core, made here while neither is running, avoids that.
+                // Renode creates its per-CPU cache of bus accesses on the
+                // first access of a CPU, without a lock. One access on behalf
+                // of each core, made while neither is running, keeps two
+                // first accesses from racing.
                 machine.SystemBus.ReadDoubleWord(RomVectorTable, core, 0);
             }
 

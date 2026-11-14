@@ -48,8 +48,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithFlag(20, name: "X4")
                 .WithReservedBits(21, 11);
 
-            // A down counter for short software delays. It has always
-            // finished by the time it is read back.
+            // A down counter for software delays. It has always finished
+            // when it is read.
             Registers.Count.Define(this)
                 .WithValueField(0, 16, valueProviderCallback: _ => 0, name: "COUNT")
                 .WithReservedBits(16, 16);
@@ -61,7 +61,6 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             FrequencyChanged?.Invoke();
         }
 
-        // Output frequency in Hz, 0 while the oscillator is off.
         public long Frequency => IsEnabled ? crystalFrequency : 0;
 
         public event Action FrequencyChanged;
@@ -85,9 +84,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
         }
     }
 
-    // ROSC: the ring oscillator the chip boots from. A ring oscillator has
-    // no exact frequency; this one runs at a fixed nominal one, whatever
-    // range, drive strength and divider are programmed.
+    // ROSC: the ring oscillator the chip boots from. It runs at a fixed nominal
+    // frequency, whatever range, drive strength and divider are programmed.
     public class RP2350_ROSC : RP2350_RegisterBlock
     {
         public RP2350_ROSC(IMachine machine, long frequency = 11000000) : base(machine)
@@ -147,13 +145,11 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             FrequencyChanged?.Invoke();
         }
 
-        // Output frequency in Hz, 0 while the oscillator is off.
         public long Frequency => IsEnabled ? nominalFrequency : 0;
 
         public event Action FrequencyChanged;
 
-        // Any value but the disable code leaves it running, the reset value
-        // included.
+        // Any value but the disable code leaves it running.
         private bool IsEnabled => enable.Value != DisableMagic;
 
         private readonly long nominalFrequency;
@@ -242,7 +238,6 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             FrequencyChanged?.Invoke();
         }
 
-        // Output frequency in Hz, 0 while the PLL has no usable output.
         public long Frequency
         {
             get
@@ -288,15 +283,10 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
         }
     }
 
-    // CLOCKS: the clock generators. The model follows the clock tree far
-    // enough to know the frequency of every clock, which is what keeps the
-    // SysTick of both cores, the tick generators and the frequency counter
-    // honest when firmware reprograms the PLLs or the dividers. Switching a
-    // clock source is instant, and the glitchless multiplexers report the new
-    // source at once.
-    //
-    // The clock inputs on GPIO pins are not modelled and count as stopped.
-    // Resuscitation, clock gating in sleep and the clock interrupts are
+    // CLOCKS: follows the clock tree far enough to know the frequency of every
+    // clock, for SysTick, the tick generators and the frequency counter.
+    // Switching a clock source is instant. The clock inputs on GPIO pins count
+    // as stopped; resuscitation, clock gating in sleep and the interrupts are
     // stored only.
     public class RP2350_Clocks : RP2350_RegisterBlock
     {
@@ -396,16 +386,12 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Update();
         }
 
-        // clk_ref in Hz: the tick generators divide this down.
         public long ReferenceFrequency => GetFrequency(Clock.Ref);
 
-        // clk_sys in Hz: the processors and their SysTick run from this.
         public long SystemFrequency => GetFrequency(Clock.Sys);
 
-        // clk_peri in Hz: the UARTs and SPIs run from this.
         public long PeripheralFrequency => GetFrequency(Clock.Peri);
 
-        // Raised whenever a clock may have changed frequency.
         public event Action FrequenciesChanged;
 
         private void DefineClock(Clock clock)
@@ -509,7 +495,6 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             }
         }
 
-        // What the frequency counter is pointed at, in Hz.
         private long CounterFrequency
         {
             get

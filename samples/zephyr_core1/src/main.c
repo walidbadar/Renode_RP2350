@@ -2,11 +2,8 @@
  * Copyright (c) 2026 Muhammad Waleed Badar
  * SPDX-License-Identifier: Apache-2.0
  *
- * Zephyr on core 0 puts core 1 to work.
- *
- * Zephyr on the RP2350 runs on one core and leaves the other parked in the
- * boot ROM. This sample launches a small worker there and hands it numbers
- * to square, using Zephyr's own driver for the inter-core mailbox.
+ * Zephyr on core 0 launches a worker on core 1 and hands it numbers to square
+ * through the driver for the inter-core mailbox.
  */
 
 #include <zephyr/device.h>

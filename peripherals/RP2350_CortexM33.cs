@@ -14,41 +14,22 @@ using Antmicro.Renode.Time;
 
 namespace Antmicro.Renode.Peripherals.CPU
 {
-    // One Cortex-M33 core as the RP2350 has it: TrustZone, 8 MPU and 8 SAU
-    // regions, FPU and DSP, and the three coprocessors Raspberry Pi added on
-    // the coprocessor port.
+    // One Cortex-M33 core of the RP2350, with the coprocessors Raspberry Pi
+    // added. Renode's Cortex-M has no coprocessor port: its translator reports
+    // a coprocessor instruction and raises an undefined instruction exception.
+    // The report is used to put a hook on the instruction, which from then on
+    // carries it out and steps over it.
     //
-    // Renode's Cortex-M has no coprocessor port. When its translator meets a
-    // coprocessor instruction it reports it and plants an undefined
-    // instruction exception. The report arrives here while the block is
-    // still being translated, which is early enough to put a hook on the
-    // instruction and have the block translated again before it runs. From
-    // then on the hook carries the instruction out and steps over it.
+    // Coprocessor 0 (GPIO) is complete. Of coprocessor 4 (double precision)
+    // only the read of the status is modelled, and on coprocessor 7
+    // (redundancy) every check passes. CPACR is not consulted, and the "2"
+    // encodings (MCR2, MRC2, CDP2, ...) still raise the exception.
     //
-    // Coprocessor 0, GPIO: complete.
-    // Coprocessor 4, double precision: only the instruction that reads the
-    //   status and clears the engaged flag, which start-up code executes on
-    //   every core. Arithmetic is not modelled.
-    // Coprocessor 7, redundancy: every check passes and every value read is
-    //   0, apart from the salt status that start-up code asks for.
-    //
-    // CPACR is not consulted: an instruction for a coprocessor that software
-    // forgot to enable works here and would fault on silicon. The "2"
-    // encodings (MCR2, MRC2, CDP2, ...) never get reported by the translator
-    // and still raise the undefined instruction exception.
-    //
-    // The core also completes Renode's idea of what ends a WFE. Renode wakes
-    // a core for SEV and for interrupts. Arm adds two more events:
-    //
-    // - Returning from an exception sets the event register. That is modelled
-    //   exactly.
-    // - So does the clearing of the core's exclusive-access monitor, which on
-    //   this chip means every STREX. Renode gives no way to see that, yet
-    //   software counts on it: the Pico SDK follows each of its lock
-    //   operations with one WFE just to use the event up. As a stand-in, a
-    //   core that has waited in WFE for wfeEventPeriod microseconds is given
-    //   an event. A WFE may end early at any time on real hardware, so
-    //   correct software only ever notices the delay. 0 turns it off.
+    // Renode ends a WFE for SEV and for interrupts. Here a return from an
+    // exception sets the event register too. The clearing of the exclusive
+    // monitor, which software such as the Pico SDK counts on, cannot be seen,
+    // so a core that has waited in WFE for wfeEventPeriod microseconds is
+    // given an event. 0 turns that off.
     public class RP2350_CortexM33 : CortexM
     {
         public RP2350_CortexM33(IMachine machine, NVIC nvic, RP2350_SIO sio = null, [NameAlias("id")] uint cpuId = 0, ulong wfeEventPeriod = 1000)
@@ -103,9 +84,8 @@ namespace Antmicro.Renode.Peripherals.CPU
                 return false;
             }
 
-            // The block being translated starts at the PC and ends with the
-            // instruction that was reported, so that instruction is the
-            // first of its kind from the PC on.
+            // The block being translated ends with the reported instruction,
+            // so that is the first of its kind from the PC on.
             var address = PC.RawValue & ~1UL;
             for(var end = address + MaximumBlockBytes; address < end; address += InstructionSize(address))
             {
@@ -165,12 +145,8 @@ namespace Antmicro.Renode.Peripherals.CPU
             }
         }
 
-        // -- Coprocessor 0: GPIO ----------------------------------------------
-
-        // The SIO's output and output enable registers, and its inputs, at
-        // coprocessor speed. CRm picks the register: 0 and 1 are the two
-        // halves of the outputs, 4 and 5 of the output enables, 8 and 9 of
-        // the inputs.
+        // CRm picks the register: 0 and 1 are the two halves of the outputs,
+        // 4 and 5 of the output enables, 8 and 9 of the inputs.
         private bool ExecuteGpio(Instruction instruction)
         {
             if(sio == null)
@@ -303,12 +279,10 @@ namespace Antmicro.Renode.Peripherals.CPU
             }
         }
 
-        // -- Coprocessor 4: double precision ----------------------------------
-
         private bool ExecuteDouble(Instruction instruction)
         {
             // Read the status and clear the engaged flag. Nothing ever
-            // engages the coprocessor here, so the status is always clear.
+            // engages the coprocessor here.
             if(instruction.Kind == InstructionKind.MoveFromCoprocessor && instruction.Opc1 == 0
                 && instruction.CRn == 0 && instruction.CRm == 0 && instruction.Opc2 == 1)
             {
@@ -319,8 +293,6 @@ namespace Antmicro.Renode.Peripherals.CPU
             ClearResults(instruction);
             return false;
         }
-
-        // -- Coprocessor 7: redundancy ----------------------------------------
 
         private bool ExecuteRedundancy(Instruction instruction)
         {
@@ -347,8 +319,6 @@ namespace Antmicro.Renode.Peripherals.CPU
             ClearResults(instruction);
             return true;
         }
-
-        // -- Instructions -----------------------------------------------------
 
         private void ClearResults(Instruction instruction)
         {

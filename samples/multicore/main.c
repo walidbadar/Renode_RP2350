@@ -45,8 +45,6 @@ static volatile uint32_t alarm_set_at;
 
 static uint32_t core1_stack[1024];
 
-/* -- Processor ------------------------------------------------------------- */
-
 static inline uint32_t cpuid(void)
 {
 	return REG32(SIO_CPUID);
@@ -80,8 +78,6 @@ static inline void irq_restore(uint32_t primask)
 	__asm__ volatile("msr primask, %0" : : "r"(primask));
 }
 
-/* -- Spinlocks ------------------------------------------------------------- */
-
 /* Reading a spinlock register claims it and returns nonzero on success. */
 static uint32_t spin_lock(unsigned int lock)
 {
@@ -97,8 +93,6 @@ static void spin_unlock(unsigned int lock, uint32_t primask)
 	REG32(SIO_SPINLOCK(lock)) = 0;
 	irq_restore(primask);
 }
-
-/* -- Console --------------------------------------------------------------- */
 
 static void put_char(char c)
 {
@@ -164,8 +158,6 @@ static void print(const char *format, ...)
 	spin_unlock(LOCK_PRINT, primask);
 }
 
-/* -- Mailbox --------------------------------------------------------------- */
-
 static void fifo_push(uint32_t value)
 {
 	while ((REG32(SIO_FIFO_ST) & SIO_FIFO_ST_RDY) == 0) {
@@ -208,8 +200,6 @@ static int request(uint32_t message, uint32_t *data)
 	*data = MSG_DATA(answer);
 	return 1;
 }
-
-/* -- Bring-up -------------------------------------------------------------- */
 
 static void unreset(uint32_t blocks)
 {
@@ -278,8 +268,6 @@ static void uart_init(void)
 	REG32(UART_CR) = UART_CR_UARTEN | UART_CR_TXE | UART_CR_RXE;
 }
 
-/* -- Shared work ----------------------------------------------------------- */
-
 /*
  * Increment the shared counter the slow way, so that an increment lost to
  * the other core is likely whenever the lock does not exclude it.
@@ -308,8 +296,6 @@ static void systick_stop(void)
 {
 	REG32(SYST_CSR) = 0;
 }
-
-/* -- Interrupt handlers ---------------------------------------------------- */
 
 void fault_handler(void)
 {
@@ -394,8 +380,6 @@ void timer_alarm1_handler(void)
 	fifo_push(MSG(CMD_ALARM, (cpuid() << 24) | (elapsed & 0xffffff)));
 }
 
-/* -- Core 1 ---------------------------------------------------------------- */
-
 static void core1_main(void)
 {
 	core1_launches++;
@@ -468,8 +452,6 @@ static int core1_start(void)
 	}
 	return fifo_pop(&hello, 1000000) && hello == MSG(CMD_HELLO, 1);
 }
-
-/* -- Checks ---------------------------------------------------------------- */
 
 static int check_launch(void)
 {
@@ -657,8 +639,6 @@ static int check_reset(void)
 	return core1_start() && core1_launches == 2 &&
 	       request(MSG(CMD_PING, 41), &data) && data == 42;
 }
-
-/* -- Core 0 ---------------------------------------------------------------- */
 
 static const struct {
 	const char *name;

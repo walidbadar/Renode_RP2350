@@ -1,9 +1,6 @@
 /*
  * Copyright (c) 2026 Muhammad Waleed Badar
  * SPDX-License-Identifier: Apache-2.0
- *
- * What the Cortex-M SMP support in Zephyr asks of the SoC, for the RP2350:
- * which core is this, start the other one, and interrupt it.
  */
 
 #include <zephyr/kernel.h>
@@ -30,10 +27,7 @@ BUILD_ASSERT(CONFIG_MP_MAX_NUM_CPUS <= 2, "the RP2350 has two cores");
 
 K_KERNEL_STACK_ARRAY_DECLARE(z_interrupt_stacks, CONFIG_MP_MAX_NUM_CPUS, CONFIG_ISR_STACK_SIZE);
 
-/*
- * Called from the reset code before there is a stack, so this is r0 only.
- * SIO_CPUID reads 0 on core 0 and 1 on core 1.
- */
+/* Called from the reset code before there is a stack, so it uses r0 only. */
 __attribute__((naked)) uint32_t soc_cpu_index(void)
 {
 	__asm__ volatile("ldr r0, =%c0\n\t"
@@ -59,16 +53,13 @@ static bool fifo_pop(uint32_t *value)
 }
 
 /*
- * Core 1 sits in the boot ROM until it has been sent, and has echoed, six
+ * Core 1 waits in the boot ROM until it has been sent, and has echoed, six
  * words through the FIFO between the cores: 0, 0, 1, then the vector table,
- * stack pointer and entry point to start with. A wrong echo means the two
- * sides are out of step and the sequence starts over; the zeroes are there to
- * get them back in step.
+ * the stack pointer and the entry point. A wrong echo restarts the sequence.
  *
- * The entry point is the reset vector, the same code core 0 started in. It
- * moves to the stack that arch_cpu_start() chose as soon as it has found out
- * which core it is on. That is the interrupt stack of core 1, so the same
- * stack serves for the few instructions before that.
+ * The entry point is the reset vector, as on core 0. The reset code moves to
+ * the stack that arch_cpu_start() chose, the interrupt stack of core 1, so
+ * core 1 is launched on that stack too.
  */
 int pm_cpu_on(unsigned long cpuid, uintptr_t entry_point)
 {
@@ -128,11 +119,7 @@ int pm_cpu_on(unsigned long cpuid, uintptr_t entry_point)
 	return ret;
 }
 
-/*
- * Runs on each core as the kernel takes it over. The NVIC is per core, so
- * what the reset code and the interrupt set-up did for core 0 has to be done
- * again here for core 1.
- */
+/* Runs on each core: the NVIC and the coprocessor enables are per core. */
 void soc_per_core_init_hook(void)
 {
 	if (soc_cpu_index() != 0U) {
@@ -170,10 +157,7 @@ void arch_sched_broadcast_ipi(void)
 
 int arch_smp_init(void)
 {
-	/*
-	 * One handler for both cores. Each core has its own doorbell interrupt
-	 * line, which soc_per_core_init_hook() enables.
-	 */
+	/* One handler for both cores; each enables its own doorbell line. */
 	IRQ_CONNECT(SIO_IRQ_BELL, 0, ipi_isr, NULL, 0);
 
 	return 0;

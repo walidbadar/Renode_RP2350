@@ -13,9 +13,8 @@ $platform?=$ORIGIN/../platforms/rpi_pico2.repl
 
 include $ORIGIN/rp2350.resc
 
-# The image goes in last on purpose. Renode would start a Cortex-M from the
-# vector table of the last ELF file loaded; the model overrules that, because
-# on the chip both cores always start in the boot ROM.
+# The image goes in last. Renode would start a Cortex-M from the vector table
+# of the last ELF file loaded, but the model starts both cores in the boot ROM.
 macro reset
 """
     sysbus LoadELF $bootrom

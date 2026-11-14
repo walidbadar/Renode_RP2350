@@ -1,10 +1,8 @@
 # Copyright (c) 2026 Muhammad Waleed Badar
 # SPDX-License-Identifier: Apache-2.0
 
-# Builds the bare-metal sample in samples/multicore, which is no Zephyr
-# application, next to an image that is only what twister needs to have
-# built. The tests in multicore.robot run the sample, as multicore.elf, and
-# not the image.
+# multicore.robot runs the bare-metal sample in samples/multicore, built here
+# as multicore.elf, and not the Zephyr image, which is only there for twister.
 
 cmake_minimum_required(VERSION 3.20.0)
 

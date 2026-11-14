@@ -6,10 +6,8 @@
 #include "cortex_m33_m33_0.dts"
 
 /*
- * One Zephyr kernel on both Cortex-M33 cores. Each core has a SysTick of
- * its own, which is no use as the one clock of an SMP kernel, so the system
- * timer is TIMER1, which both cores see. TIMER0 is left to the counter
- * driver.
+ * SysTick is per core, so the system timer is TIMER1, which both cores see.
+ * TIMER0 is left to the counter driver.
  */
 / {
 	model = "RP2350 in Renode, both cores";

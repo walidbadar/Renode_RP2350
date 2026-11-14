@@ -1,7 +1,6 @@
 # Copyright (c) 2026 Muhammad Waleed Badar
 # SPDX-License-Identifier: Apache-2.0
 
-# What the Pico 2 has without SMP
 CONFIG_BUILD_OUTPUT_HEX=y
 CONFIG_BUILD_OUTPUT_UF2=y
 CONFIG_CLOCK_CONTROL=y
@@ -13,6 +12,5 @@ CONFIG_UART_CONSOLE=y
 CONFIG_UART_INTERRUPT_DRIVEN=y
 CONFIG_USE_DT_CODE_PARTITION=y
 
-# One kernel on both cores
 CONFIG_SMP=y
 CONFIG_MP_MAX_NUM_CPUS=2

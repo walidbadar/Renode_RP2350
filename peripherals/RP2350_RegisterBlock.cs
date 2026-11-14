@@ -9,10 +9,8 @@ using Antmicro.Renode.Peripherals.Bus;
 
 namespace Antmicro.Renode.Peripherals.Miscellaneous
 {
-    // Each RP2350 register block behind the APB and AHB bridges decodes its
-    // 4 kB of registers four times over: the registers themselves, then
-    // aliases that XOR, set and clear bits on write, so that software can
-    // change a field without a read-modify-write of its own.
+    // Every RP2350 register block is decoded four times: the registers, then
+    // aliases that XOR, set and clear bits on write.
     public static class RP2350_AtomicAccess
     {
         public static uint Read(DoubleWordRegisterCollection registers, long offset)
@@ -25,8 +23,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             var register = offset & RegisterMask;
             var alias = (Alias)((offset >> AliasShift) & 0x3);
 
-            // A write-one-to-clear register takes the mask as it comes:
-            // folding the current value in would acknowledge bits the caller
+            // A write-one-to-clear register takes the value as written:
+            // merging the current value in would acknowledge bits the caller
             // never named.
             if(alias != Alias.None && (writeOneToClear == null || !writeOneToClear.Contains(register)))
             {
@@ -62,9 +60,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
         }
     }
 
-    // Common part of the register blocks modelled here. Both cores reach
-    // them, so every access takes the block lock. Compilers narrow an access
-    // when they only need part of a register; the bus widens those again.
+    // Common part of the register blocks. Both cores access them, so every
+    // access takes the block lock.
     [AllowedTranslations(AllowedTranslation.ByteToDoubleWord | AllowedTranslation.WordToDoubleWord)]
     public abstract class RP2350_RegisterBlock : IDoubleWordPeripheral, IKnownSize, IProvidesRegisterCollection<DoubleWordRegisterCollection>
     {

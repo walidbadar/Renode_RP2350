@@ -17,10 +17,6 @@
 	.cpu cortex-m33
 	.thumb
 
-/* ------------------------------------------------------------------------ */
-/* Vector table and well-known locations                                     */
-/* ------------------------------------------------------------------------ */
-
 	.section .vectors, "ax", %progbits
 	.global __vectors
 __vectors:
@@ -34,10 +30,6 @@ __vectors:
 	.hword	rom_table_lookup + 1		/* 0x16: table lookup (Thumb) */
 	.hword	rom_table_lookup_entry + 1	/* 0x18: entry lookup (Thumb) */
 	.hword	0
-
-/* ------------------------------------------------------------------------ */
-/* Reset                                                                     */
-/* ------------------------------------------------------------------------ */
 
 	.section .text.rom_reset, "ax", %progbits
 	.global rom_reset
@@ -69,10 +61,6 @@ rom_nmi:
 rom_hardfault:
 	b	rom_hardfault
 
-/* ------------------------------------------------------------------------ */
-/* Entering an image                                                         */
-/* ------------------------------------------------------------------------ */
-
 /*
  * void rom_enter_image(uint32_t vtor, uint32_t sp, uint32_t pc,
  *                      uint32_t sp_limit);
@@ -93,10 +81,6 @@ rom_enter_image:
 rom_image_returned:
 	wfi
 	b	rom_image_returned
-
-/* ------------------------------------------------------------------------ */
-/* Core 1 launch protocol                                                    */
-/* ------------------------------------------------------------------------ */
 
 /*
  * Core 1 drains its FIFO and sends 0, then expects 1, the vector table, the
@@ -183,10 +167,6 @@ core1_receive:
 	bx	lr
 
 	.ltorg
-
-/* ------------------------------------------------------------------------ */
-/* ROM table                                                                 */
-/* ------------------------------------------------------------------------ */
 
 /* See rom_table_lookup_entry() for the layout. */
 	.macro rom_func c1, c2, function

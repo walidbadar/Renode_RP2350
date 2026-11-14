@@ -10,13 +10,10 @@ using Antmicro.Renode.Time;
 
 namespace Antmicro.Renode.Peripherals.Timers
 {
-    // WATCHDOG: a down counter that resets the chip when it runs out, plus
-    // eight scratch registers that survive that reset.
-    //
-    // What a watchdog reset takes down is chosen in PSM.WDSEL. The model
-    // knows two outcomes: nothing selected, where the watchdog only records
-    // its reason, and anything selected, where the whole machine is reset
-    // with the scratch registers and the reason kept.
+    // WATCHDOG: a down counter that resets the chip when it runs out, and eight
+    // scratch registers that survive that reset. With nothing selected in
+    // PSM.WDSEL the watchdog only records its reason; otherwise the whole
+    // machine is reset.
     public class RP2350_Watchdog : RP2350_RegisterBlock
     {
         public RP2350_Watchdog(IMachine machine, RP2350_Ticks ticks = null, RP2350_PSM psm = null) : base(machine)
@@ -85,7 +82,7 @@ namespace Antmicro.Renode.Peripherals.Timers
             }
         }
 
-        // What a watchdog reset leaves alone is exactly what is not here.
+        // Resets everything but what survives a watchdog reset.
         private void ResetCounter()
         {
             base.Reset();

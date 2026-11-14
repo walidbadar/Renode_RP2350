@@ -2,13 +2,12 @@
  * Copyright (c) 2026 Muhammad Waleed Badar
  * SPDX-License-Identifier: Apache-2.0
  *
- * Boot ROM stand-in for the RP2350 Renode model, core 0 side: find an image
- * the way the silicon ROM does, by its IMAGE_DEF block, enter it, and answer
- * the handful of ROM calls that software makes on a system with two cores.
+ * Boot ROM stand-in for the RP2350 Renode model, core 0 side: finds an image
+ * by its IMAGE_DEF block, enters it, and answers the ROM calls that software
+ * makes on a system with two cores.
  *
- * This is not the Raspberry Pi boot ROM and shares no code with it. It
- * implements the documented interfaces only as far as the model needs:
- * no signature or hash checks, no partitions, no USB or UART boot.
+ * This is not the Raspberry Pi boot ROM and shares no code with it. There are
+ * no signature or hash checks, no partitions and no USB or UART boot.
  */
 
 #include <stdint.h>
@@ -17,10 +16,6 @@
 
 void rom_enter_image(uint32_t vtor, uint32_t sp, uint32_t pc, uint32_t sp_limit);
 void rom_wait_for_vector(void);
-
-/* ------------------------------------------------------------------------ */
-/* Image discovery                                                           */
-/* ------------------------------------------------------------------------ */
 
 #define PICOBIN_BLOCK_MARKER_START	0xffffded3u
 #define PICOBIN_BLOCK_MARKER_END	0xab123579u
@@ -48,10 +43,7 @@ struct image {
 	uint32_t sp_limit;
 };
 
-/*
- * Walk the items of the block starting at blk. Returns nonzero when the
- * block is well formed and describes an Arm executable for this chip.
- */
+/* Returns nonzero when the block at blk is an Arm executable for this chip. */
 static int parse_image_def(const uint32_t *blk, uint32_t image_base, struct image *img)
 {
 	const uint32_t *item = blk + 1;
@@ -154,9 +146,8 @@ static int find_image(uint32_t image_base, struct image *img)
 }
 
 /*
- * Flash first, as after a power-on reset. Main SRAM is tried second so that
- * a RAM-only image loaded by the simulator boots without further setup; the
- * silicon ROM only does that when asked to through a RAM image reboot.
+ * Flash first, then main SRAM, so that a RAM-only image loaded by the
+ * simulator boots without further setup.
  */
 void rom_boot_core0(void)
 {
@@ -166,10 +157,6 @@ void rom_boot_core0(void)
 		rom_enter_image(img.vtor, img.sp, img.pc, img.sp_limit);
 	}
 }
-
-/* ------------------------------------------------------------------------ */
-/* ROM functions                                                             */
-/* ------------------------------------------------------------------------ */
 
 #define BOOTROM_OK			0
 #define BOOTROM_ERROR_NOT_PERMITTED	(-4)
@@ -193,9 +180,8 @@ int rom_set_bootrom_stack(void *stack)
 }
 
 /*
- * Only the reboots that end in the image being started again are honoured,
- * and without the delay. BOOTSEL, RAM image and PC/SP reboots need parts of
- * the chip that are not modelled.
+ * Only the reboots that start the image again are honoured, and without the
+ * delay. The others need parts of the chip that are not modelled.
  */
 int rom_reboot(uint32_t flags, uint32_t delay_ms, uint32_t p0, uint32_t p1)
 {
@@ -213,10 +199,6 @@ int rom_reboot(uint32_t flags, uint32_t delay_ms, uint32_t p0, uint32_t p1)
 	for (;;) {
 	}
 }
-
-/* ------------------------------------------------------------------------ */
-/* ROM table lookup                                                          */
-/* ------------------------------------------------------------------------ */
 
 /*
  * The table (in start.S) has the shape of the silicon one: a two-character

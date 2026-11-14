@@ -7,10 +7,8 @@
 #                       SOURCES <file>...
 #                       [DEPENDS <file>...])
 #
-# Builds a program that is not a Zephyr image, with the compiler of the
-# Zephyr build it is called from, and makes that image depend on it. The boot
-# ROM stand-in and the bare-metal sample are built this way: neither links
-# against anything, and neither enables the FPU.
+# Builds a program that is not a Zephyr image with the compiler of the Zephyr
+# build it is called from, and makes that image depend on it.
 function(rp2350_bare_metal_elf target)
   cmake_parse_arguments(BM "" "OUTPUT;LINKER_SCRIPT" "SOURCES;DEPENDS" ${ARGN})
 

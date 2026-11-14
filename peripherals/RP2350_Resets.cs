@@ -8,21 +8,14 @@ using Antmicro.Renode.Logging;
 
 namespace Antmicro.Renode.Peripherals.Miscellaneous
 {
-    // RESETS: one reset line per peripheral block. A block that software
-    // puts into reset is reset in the model too, whatever model sits at its
-    // address, so firmware that hands over from one stage to the next finds
-    // the hardware as clean as it would on silicon. Blocks come out of reset
-    // at once.
-    //
-    // A block held in reset still answers on the bus here; on silicon it
-    // would not.
+    // RESETS: one reset line per peripheral block. Asserting a line resets the
+    // model at the address of that block. Blocks come out of reset at once, and
+    // a block held in reset still answers on the bus.
     public class RP2350_Resets : RP2350_RegisterBlock
     {
         public RP2350_Resets(IMachine machine) : base(machine)
         {
-            // Software names "every block but these" with masks that reach
-            // into the unused top bits, so those take a write without
-            // comment, and read as zero.
+            // Software writes masks that reach into the unused top bits.
             Registers.Reset.Define(this, AllBlocks)
                 .WithValueField(0, NumberOfBlocks, out reset, name: "RESET")
                 .WithValueField(NumberOfBlocks, 32 - NumberOfBlocks, FieldMode.Write, name: "UNUSED")

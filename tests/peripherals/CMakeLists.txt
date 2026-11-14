@@ -1,9 +1,8 @@
 # Copyright (c) 2026 Muhammad Waleed Badar
 # SPDX-License-Identifier: Apache-2.0
 
-# The image is only what twister needs to have built: the tests in
-# peripherals.robot load no image, just the boot ROM stand-in that the board
-# builds next to it.
+# peripherals.robot loads no image, only the boot ROM stand-in that is built
+# next to it. The Zephyr image is only there for twister.
 
 cmake_minimum_required(VERSION 3.20.0)
 

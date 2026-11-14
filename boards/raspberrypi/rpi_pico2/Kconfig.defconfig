@@ -3,15 +3,12 @@
 
 if BOARD_RPI_PICO2_RP2350A_M33_SMP
 
-# CONFIG_SMP depends on the switch-based context switch, which nothing in
-# Zephyr turns on for a Cortex-M by itself.
+# SMP on Cortex-M needs the switch-based context switch.
 config USE_SWITCH
 	default y
 
-# An idle thread that is interrupted and switched out holds an exception
-# frame and a switch frame on top of what the idle loop itself uses. With
-# SMP that is more than the 320 bytes Zephyr gives a Cortex-M, and the
-# overflow lands in the interrupt stack of core 1.
+# The Cortex-M default of 320 bytes is too small for the frames that an
+# interrupted idle thread holds with SMP.
 config IDLE_STACK_SIZE
 	default 1024
 

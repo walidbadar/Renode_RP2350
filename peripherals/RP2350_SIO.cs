@@ -13,14 +13,10 @@ using Antmicro.Renode.Peripherals.GPIOPort;
 
 namespace Antmicro.Renode.Peripherals.Miscellaneous
 {
-    // SIO: the single-cycle IO block, and the place where the two cores of an
-    // RP2350 meet. It tells a core which one it is, carries the two mailbox
-    // FIFOs and the doorbells between them, holds the 32 hardware spinlocks,
-    // and gives both cores direct access to the GPIOs.
-    //
-    // Most registers read differently depending on the core asking, so the
-    // model looks at which CPU is on the bus for every access. An access made
-    // from outside a CPU, such as from the Monitor, is treated as core 0.
+    // SIO: tells a core which one it is, and holds the mailbox FIFOs and the
+    // doorbells between the cores, the spinlocks and the GPIOs. Most registers
+    // depend on the core that asks. An access from outside a CPU, such as from
+    // the Monitor, counts as one from core 0.
     //
     // Not modelled: the interpolators, the TMDS encoder, the RISC-V timer and
     // soft interrupts, and the Non-secure copy of the block.
@@ -87,17 +83,12 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
 
         public DoubleWordRegisterCollection RegistersCollection { get; }
 
-        // Mailbox interrupt of each core: asserted while its receive FIFO
-        // holds data or one of its two error flags is set.
         public GPIO FifoIRQ0 { get; }
         public GPIO FifoIRQ1 { get; }
 
-        // Doorbell interrupt of each core: asserted while any doorbell rung
-        // for it has not been acknowledged.
         public GPIO DoorbellIRQ0 { get; }
         public GPIO DoorbellIRQ1 { get; }
 
-        // GPIO output levels, one bit per pin.
         public ulong GpioOutputs
         {
             get
@@ -109,7 +100,6 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             }
         }
 
-        // GPIO output enables, one bit per pin.
         public ulong GpioOutputEnables
         {
             get
@@ -121,8 +111,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             }
         }
 
-        // GPIO input levels, one bit per pin. Without an IO bank to ask, the
-        // pins read back what the SIO drives.
+        // Without an IO bank, the pins read back what the SIO drives.
         public ulong GpioInputs
         {
             get
@@ -134,9 +123,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             }
         }
 
-        // Change the output levels in one step, as seen from the other core.
-        // The GPIO coprocessor of each core drives the same register as the
-        // memory-mapped interface, and goes through here.
+        // The GPIO coprocessor of each core drives the same registers through
+        // these two.
         public void UpdateGpioOutputs(Func<ulong, ulong> change)
         {
             lock(locker)
@@ -146,7 +134,6 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             }
         }
 
-        // The same for the output enables.
         public void UpdateGpioOutputEnables(Func<ulong, ulong> change)
         {
             lock(locker)
@@ -191,8 +178,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                             readOnEmpty[CurrentCore] = false;
                         }
                     }, name: "ROE")
-                // Drivers clear the flags by writing all ones; the bits
-                // above them take the write and read as zero.
+                // Drivers clear the flags by writing all ones.
                 .WithValueField(4, 28, FieldMode.Write, name: "UNUSED")
                 .WithWriteCallback((_, __) => UpdateInterrupts());
 
@@ -239,8 +225,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 register.WithValueField(0, 32,
                     valueProviderCallback: _ =>
                     {
-                        // Reading claims the lock, and says so by returning
-                        // nonzero; a lock that is already held reads as zero.
+                        // Reading claims the lock; a held lock reads as 0.
                         if((spinlocks & bit) != 0)
                         {
                             return 0;
@@ -275,8 +260,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithReservedBits(8, 24)
                 .WithWriteCallback((_, __) => UpdateInterrupts());
 
-            // Stored per core; there is no Non-secure SIO to hand the
-            // interpolators and the TMDS encoder over to.
+            // Stored only: there is no Non-secure SIO.
             Registers.PeripheralsNonSecure.Define(this)
                 .WithValueField(0, 6, valueProviderCallback: _ => peripheralsNonSecure[CurrentCore],
                     writeCallback: (_, value) => peripheralsNonSecure[CurrentCore] = (uint)value & 0x23, name: "PERI_NONSEC")
@@ -309,12 +293,10 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             }
         }
 
-        // The lines of the core that is making the access change at once. The
-        // lines of the other core change at the next point where Renode has
-        // the cores in step, and not from under it while it runs: its NVIC is
-        // not prepared for an interrupt that arrives from another thread just
-        // as the core raises BASEPRI, and has the core take an exception that
-        // nothing was acknowledged for.
+        // The lines of the core making the access change at once. Those of the
+        // other core change at the next point where Renode has the cores in
+        // step: its NVIC is not prepared for an interrupt that arrives from
+        // another thread while the core runs.
         private void UpdateInterrupts()
         {
             if(!machine.GetSystemBus(this).TryGetCurrentCPU(out var _))
@@ -378,7 +360,6 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
         private readonly uint[] peripheralsNonSecure = new uint[NumberOfCores];
 
         private const int NumberOfCores = 2;
-        // Four words on the RP2350; the RP2040 had eight.
         private const int FifoDepth = 4;
         private const uint NumberOfSpinlocks = 32;
         private const ulong GpioMask = (1UL << RP2350_IOBank0.NumberOfPins) - 1;

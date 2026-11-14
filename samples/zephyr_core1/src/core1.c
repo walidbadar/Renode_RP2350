@@ -2,12 +2,9 @@
  * Copyright (c) 2026 Muhammad Waleed Badar
  * SPDX-License-Identifier: Apache-2.0
  *
- * The part of the sample that concerns core 1: launching it, and what it
- * runs.
- *
- * Zephyr knows nothing about core 1 here. The worker is a plain function
- * with a stack and a vector table of its own; it calls nothing in the
- * kernel, takes no interrupts, and talks to core 0 through the mailbox only.
+ * Launching core 1, and what it runs: a plain function with a stack and a
+ * vector table of its own, which calls nothing in the kernel, takes no
+ * interrupts and talks to core 0 through the mailbox only.
  */
 
 #include <zephyr/kernel.h>
@@ -50,9 +47,8 @@ static void core1_worker(void)
 }
 
 /*
- * Zephyr's vector table leads into its interrupt handling, which keeps its
- * state per CPU and has only one here. Core 1 gets a table that keeps it
- * out of there: nothing but faults can happen, and they stop the core.
+ * Zephyr's interrupt handling keeps its state per CPU and has only one here,
+ * so core 1 gets a vector table of its own: faults stop the core.
  */
 static const uint32_t core1_vectors[16] __aligned(256) = {
 	(uint32_t)&core1_stack[CORE1_STACK_WORDS],

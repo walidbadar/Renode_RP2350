@@ -2,18 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 // Raspberry Pi RP2350 with both of its Arm Cortex-M33 cores.
-//
-// The peripherals named RP2350_* are not part of Renode: load them first
-// with scripts/rp2350.resc, or include the files in peripherals/ yourself.
 
-// ---------------------------------------------------------------------------
 // Processors
-// ---------------------------------------------------------------------------
 //
 // Each core has its own NVIC, SysTick and system control block at the same
 // address, so those are registered per CPU. Peripheral interrupts go to both
-// NVICs and software decides which core enables them; the SIO and GPIO
-// interrupts are the exception, with a separate line for each core.
+// NVICs; the SIO and GPIO interrupts have a separate line for each core.
 
 nvic0: IRQControllers.NVIC @ {
         sysbus new Bus.BusPointRegistration { address: 0xE000E000; cpu: cpu0 }
@@ -41,11 +35,9 @@ cpu1: CPU.RP2350_CortexM33 @ sysbus
     nvic: nvic1
     sio: sio
 
-// ---------------------------------------------------------------------------
 // Memory
-// ---------------------------------------------------------------------------
 
-// Boot ROM. Load build/bootrom/bootrom.elf here; both cores start in it.
+// Boot ROM; both cores start in it.
 rom: Memory.MappedMemory @ sysbus 0x00000000
     size: 0x8000
 
@@ -60,9 +52,7 @@ sram: Memory.MappedMemory @ sysbus 0x20000000
 // RAM reserved for the boot ROM, and the locks the ROM shares between cores.
 bootram: Miscellaneous.RP2350_BootRam @ sysbus 0x400E0000
 
-// ---------------------------------------------------------------------------
 // Dual-core support
-// ---------------------------------------------------------------------------
 
 sio: Miscellaneous.RP2350_SIO @ sysbus 0xD0000000
     gpio: io_bank0
@@ -76,9 +66,7 @@ psm: Miscellaneous.RP2350_PSM @ sysbus 0x40018000
     core1: cpu1
     nvic1: nvic1
 
-// ---------------------------------------------------------------------------
 // Identification
-// ---------------------------------------------------------------------------
 
 // An RP2350A, the 60-pin package, at the A2 stepping.
 sysinfo: Miscellaneous.RP2350_SysInfo @ sysbus 0x40000000
@@ -87,9 +75,7 @@ sysinfo: Miscellaneous.RP2350_SysInfo @ sysbus 0x40000000
 
 tbman: Miscellaneous.RP2350_TBMAN @ sysbus 0x40160000
 
-// ---------------------------------------------------------------------------
 // Clocks and resets
-// ---------------------------------------------------------------------------
 
 resets: Miscellaneous.RP2350_Resets @ sysbus 0x40020000
 
@@ -113,9 +99,7 @@ clocks: Miscellaneous.RP2350_Clocks @ sysbus 0x40010000
 ticks: Miscellaneous.RP2350_Ticks @ sysbus 0x40108000
     clocks: clocks
 
-// ---------------------------------------------------------------------------
 // Timers
-// ---------------------------------------------------------------------------
 
 timer0: Timers.RP2350_Timer @ sysbus 0x400B0000
     ticks: ticks
@@ -131,9 +115,7 @@ watchdog: Timers.RP2350_Watchdog @ sysbus 0x400D8000
     ticks: ticks
     psm: psm
 
-// ---------------------------------------------------------------------------
 // GPIO
-// ---------------------------------------------------------------------------
 
 pads_bank0: Miscellaneous.RP2350_Pads @ sysbus 0x40038000
 
@@ -142,17 +124,12 @@ io_bank0: GPIOPort.RP2350_IOBank0 @ sysbus 0x40028000
     Proc0IRQ -> nvic0@21
     Proc1IRQ -> nvic1@21
 
-// ---------------------------------------------------------------------------
 // UART
-// ---------------------------------------------------------------------------
 
-// The PL011 that Renode ships, and in front of each the bridge that gives it
-// the atomic set, clear and XOR aliases every RP2350 block has.
-//
-// The FIFOs of the real UARTs are 32 deep. Renode's model has no receive
-// timeout interrupt, so with a deep FIFO a short line would sit there until
-// enough characters followed it to reach the trigger level. Left at its
-// default depth of 1, the model interrupts for every character instead.
+// Renode's PL011, and in front of each the bridge that gives it the atomic
+// set, clear and XOR aliases. The FIFO depth is left at 1, not the 32 of the
+// chip: the model has no receive timeout interrupt, so a short line would
+// wait in a deeper FIFO for the trigger level.
 
 uart0: UART.PL011 @ sysbus 0x40070000
     -> nvic0@33 | nvic1@33
@@ -166,12 +143,7 @@ uart1: UART.PL011 @ sysbus 0x40078000
 uart1_alias: Miscellaneous.RP2350_AtomicAlias @ sysbus 0x40079000
     target: uart1
 
-// ---------------------------------------------------------------------------
-// Not modelled
-// ---------------------------------------------------------------------------
-//
-// Named so that the log says which block an access went to. Reads return 0
-// and writes are dropped.
+// Not modelled. Named so that the log says which block an access went to.
 
 sysbus:
     init:

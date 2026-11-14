@@ -12,14 +12,9 @@
 #include "cortex_m33-pinctrl.dtsi"
 
 /*
- * The RP2350A as the model in this repository has it, laid out like a
- * Pico 2: the console on UART0 at GPIO0 and GPIO1, an LED on GPIO25. Only
- * what the model implements is enabled. Flash is there to run from; no flash
- * controller is chosen, because the model has no chip behind the QSPI
- * interface and its boot ROM stand-in has no flash functions.
- *
- * Zephyr runs on core 0. Core 1 stays in the boot ROM until an application
- * launches it. The smp variant of the board runs Zephyr on both.
+ * The RP2350A as modelled, laid out like a Pico 2: the console on UART0 at
+ * GPIO0 and GPIO1, an LED on GPIO25. No flash controller is chosen, because
+ * the model has no chip behind the QSPI interface.
  */
 / {
 	model = "RP2350 in Renode";
@@ -72,7 +67,6 @@
 	status = "okay";
 };
 
-/* The mailbox between the cores; the driver is built with CONFIG_MBOX. */
 &mbox {
 	status = "okay";
 };

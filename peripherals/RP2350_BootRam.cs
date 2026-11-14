@@ -8,11 +8,9 @@ using Antmicro.Renode.Peripherals.Bus;
 
 namespace Antmicro.Renode.Peripherals.Miscellaneous
 {
-    // BOOTRAM: 1 kB of RAM set aside for the boot ROM, which keeps its stack
-    // there so that booting never disturbs main SRAM, followed by a few
-    // registers: two words whose bits can be set but not cleared, and eight
-    // locks that work like the SIO spinlocks and keep the two cores out of
-    // each other's way inside the ROM.
+    // BOOTRAM: 1 kB of RAM for the boot ROM, followed by two words whose bits
+    // can be set but not cleared and eight locks that work like the SIO
+    // spinlocks.
     [AllowedTranslations(AllowedTranslation.ByteToDoubleWord | AllowedTranslation.WordToDoubleWord)]
     public class RP2350_BootRam : IDoubleWordPeripheral, IKnownSize, IProvidesRegisterCollection<DoubleWordRegisterCollection>
     {
@@ -36,8 +34,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 register.WithValueField(0, 32,
                     valueProviderCallback: _ =>
                     {
-                        // Reading claims the lock, and says so by returning
-                        // nonzero; a lock that is already held reads as zero.
+                        // Reading claims the lock; a held lock reads as 0.
                         if((claimed & bit) != 0)
                         {
                             return 0;
@@ -50,7 +47,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             });
         }
 
-        // The RAM keeps its contents, as RAM does across a reset.
+        // The RAM keeps its contents across a reset.
         public void Reset()
         {
             lock(locker)

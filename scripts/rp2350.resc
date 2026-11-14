@@ -4,24 +4,20 @@
 :name: RP2350
 :description: Raspberry Pi RP2350 with both Cortex-M33 cores and the boot ROM stand-in.
 
-# Creates the machine and loads the boot ROM, nothing else: both cores then
-# sit in the ROM, core 0 for want of an image and core 1 waiting to be
-# launched. Include this from a script that goes on to load an image, the way
-# rpi_pico2.resc does.
+# Creates the machine and loads the boot ROM. Include this from a script that
+# goes on to load an image, as rpi_pico2.resc does.
 
 $name?="rp2350"
 $platform?=$ORIGIN/../platforms/rp2350.repl
 
-# The boot ROM stand-in is built with every image for the cortex_m33 board
-# and left next to it as rp2350_bootrom.elf. That is where it is looked for,
-# next to $elf, unless $bootrom says otherwise.
+# The boot ROM stand-in is looked for next to $elf, as rp2350_bootrom.elf,
+# unless $bootrom says otherwise.
 python "import os; monitor.Parse('$bootrom?=@' + os.path.join(os.path.dirname(str(monitor.GetVariable('elf'))), 'rp2350_bootrom.elf'))"
 
 using sysbus
 mach create $name
 
-# The models that are not part of Renode. The order matters: a model can only
-# refer to models that were compiled before it.
+# The order matters: a model can only refer to models compiled before it.
 include $ORIGIN/../peripherals/RP2350_RegisterBlock.cs
 include $ORIGIN/../peripherals/RP2350_AtomicAlias.cs
 include $ORIGIN/../peripherals/RP2350_SysInfo.cs

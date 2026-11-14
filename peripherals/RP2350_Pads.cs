@@ -8,9 +8,8 @@ using Antmicro.Renode.Core.Structure.Registers;
 
 namespace Antmicro.Renode.Peripherals.Miscellaneous
 {
-    // PADS_BANK0: electrical control of the 48 user pads. Only the two bits
-    // that decide whether a pad passes signals are acted on; drive strength,
-    // slew, Schmitt trigger and pulls are stored and read back.
+    // PADS_BANK0: pad control of the 48 user pads. Only the input enable and
+    // the isolation bit are acted on; the other fields are stored.
     public class RP2350_Pads : RP2350_RegisterBlock
     {
         public RP2350_Pads(IMachine machine) : base(machine)
@@ -39,14 +38,11 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithReservedBits(9, 23);
         }
 
-        // A pad only reports its level to the chip with its input buffer on.
         public bool IsInputEnabled(int pad)
         {
             return inputEnable[pad].Value;
         }
 
-        // Pads come out of reset isolated: the level they drive stays latched
-        // until software has set the pad up and removes the isolation.
         public bool IsIsolated(int pad)
         {
             return isolated[pad].Value;

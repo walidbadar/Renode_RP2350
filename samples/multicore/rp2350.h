@@ -18,7 +18,7 @@
 #define REG_SET(address)	REG32((address) + 0x2000)
 #define REG_CLR(address)	REG32((address) + 0x3000)
 
-/* -- Clocks ---------------------------------------------------------------- */
+/* Clocks */
 
 #define CLOCKS_BASE		0x40010000
 #define CLK_REF_CTRL		(CLOCKS_BASE + 0x30)
@@ -59,7 +59,7 @@
 #define TICKS_TIMER0_CYCLES	(TICKS_BASE + 0x1c)
 #define TICKS_CTRL_ENABLE	(1u << 0)
 
-/* -- Resets and power ------------------------------------------------------ */
+/* Resets and power */
 
 #define RESETS_BASE		0x40020000
 #define RESETS_RESET		(RESETS_BASE + 0x0)
@@ -75,7 +75,7 @@
 #define PSM_FRCE_OFF		(PSM_BASE + 0x4)
 #define PSM_FRCE_OFF_PROC1	(1u << 24)
 
-/* -- Pins ------------------------------------------------------------------ */
+/* Pins */
 
 #define IO_BANK0_BASE		0x40028000
 #define IO_BANK0_GPIO_CTRL(n)	(IO_BANK0_BASE + 0x004 + 8 * (n))
@@ -86,7 +86,7 @@
 #define PADS_IE			(1u << 6)
 #define PADS_ISO		(1u << 8)
 
-/* -- UART (PL011) ---------------------------------------------------------- */
+/* UART (PL011) */
 
 #define UART0_BASE		0x40070000
 #define UART_DR			(UART0_BASE + 0x00)
@@ -103,7 +103,7 @@
 #define UART_CR_TXE		(1u << 8)
 #define UART_CR_RXE		(1u << 9)
 
-/* -- Timer ----------------------------------------------------------------- */
+/* Timer */
 
 #define TIMER0_BASE		0x400b0000
 #define TIMER_ALARM(n)		(TIMER0_BASE + 0x10 + 4 * (n))
@@ -111,7 +111,7 @@
 #define TIMER_INTR		(TIMER0_BASE + 0x3c)
 #define TIMER_INTE		(TIMER0_BASE + 0x40)
 
-/* -- SIO ------------------------------------------------------------------- */
+/* SIO */
 
 #define SIO_BASE		0xd0000000
 #define SIO_CPUID		(SIO_BASE + 0x000)
@@ -127,10 +127,9 @@
 #define SIO_FIFO_ST_RDY		(1u << 1)
 #define SIO_FIFO_ST_WOF		(1u << 2)
 #define SIO_FIFO_ST_ROE		(1u << 3)
-/* Four words each way; the RP2040 had eight. */
 #define SIO_FIFO_DEPTH		4
 
-/* -- Cortex-M33 ------------------------------------------------------------ */
+/* Cortex-M33 */
 
 #define SYST_CSR		0xe000e010
 #define SYST_RVR		0xe000e014
@@ -143,7 +142,7 @@
 #define NVIC_ICER(n)		(0xe000e180 + 4 * (n))
 #define NVIC_ICPR(n)		(0xe000e280 + 4 * (n))
 
-/* -- Interrupt numbers ----------------------------------------------------- */
+/* Interrupt numbers */
 
 #define IRQ_TIMER0_ALARM(n)	(n)
 #define IRQ_SIO_FIFO		25

@@ -10,14 +10,10 @@ using Antmicro.Renode.Peripherals.Miscellaneous;
 
 namespace Antmicro.Renode.Peripherals.GPIOPort
 {
-    // IO_BANK0: function select and interrupts for the 48 user GPIOs. This is
-    // where the pins live in the model: anything wired to a pin in the
-    // platform description connects here, and the SIO reaches the outside
-    // world through it.
-    //
-    // Only the SIO function drives a pin; the other functions are modelled at
-    // the level of their peripherals, not their pins. GPIO interrupts are
-    // routed twice, once to each core, with separate enables.
+    // IO_BANK0: function select and interrupts of the 48 user GPIOs. Anything
+    // wired to a pin in the platform description connects here. Only the SIO
+    // function drives a pin. GPIO interrupts are routed to each core
+    // separately.
     [AllowedTranslations(AllowedTranslation.ByteToDoubleWord | AllowedTranslation.WordToDoubleWord)]
     public class RP2350_IOBank0 : BaseGPIOPort, IDoubleWordPeripheral, IKnownSize, IProvidesRegisterCollection<DoubleWordRegisterCollection>
     {
@@ -101,7 +97,6 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
             }
         }
 
-        // Output levels and output enables of the SIO, one bit per pin.
         public void SetSioOutputs(ulong outputs, ulong enables)
         {
             lock(locker)
@@ -120,7 +115,6 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
             }
         }
 
-        // Levels the peripherals see on the pins, one bit per pin.
         public ulong ReadPins()
         {
             lock(locker)
@@ -180,8 +174,7 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
                     });
             }, stepInBytes: 8, resetValue: FunctionNull);
 
-            // Which pins are interrupting each destination, one bit per pin.
-            // Nothing is ever routed to the Non-secure side here.
+            // Nothing is ever routed to the Non-secure side.
             for(var target = 0; target < NumberOfTargets; target++)
             {
                 var t = target;

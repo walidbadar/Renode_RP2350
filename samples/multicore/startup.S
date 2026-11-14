@@ -11,11 +11,7 @@
 	.cpu cortex-m33
 	.thumb
 
-/*
- * One table for both cores: each core has its own NVIC, but they are pointed
- * at the same vectors, and the handlers that care ask the SIO which core
- * they are running on.
- */
+/* One table for both cores: the handlers ask the SIO which core they run on. */
 	.section .vectors, "a", %progbits
 	.global __vectors
 __vectors:
@@ -48,10 +44,9 @@ __vectors:
 	.endr
 
 /*
- * The boot ROM only starts an image that describes itself. This is the
- * smallest description there is: an Arm executable for the RP2350, to be
- * entered through the vector table at the start of the image. The block has
- * to lie within the first 4 kB, which is why it follows the vectors.
+ * The boot ROM only starts an image that has an IMAGE_DEF block within its
+ * first 4 kB: here an Arm executable for the RP2350, entered through the
+ * vector table at the start of the image.
  */
 	.section .image_def, "a", %progbits
 	.word	0xffffded3		/* block start */

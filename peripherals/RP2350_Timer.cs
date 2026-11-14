@@ -12,13 +12,9 @@ using Antmicro.Renode.Time;
 
 namespace Antmicro.Renode.Peripherals.Timers
 {
-    // TIMER0 and TIMER1: a 64-bit counter, nominally of microseconds, with
-    // four alarms that match on its low half. Each alarm has its own
-    // interrupt line, and the lines go to both cores.
-    //
-    // The counter advances on the ticks of its generator in the TICKS block,
-    // or on clk_sys when SOURCE says so. Without a TICKS block to follow it
-    // counts at 1 MHz.
+    // TIMER0 and TIMER1: a 64-bit counter with four alarms that match on its
+    // low half. It counts the ticks of its generator in the TICKS block, or
+    // clk_sys when SOURCE says so. Without a TICKS block it counts at 1 MHz.
     public class RP2350_Timer : RP2350_RegisterBlock, INumberedGPIOOutput
     {
         public RP2350_Timer(IMachine machine, RP2350_Ticks ticks = null, uint index = 0) : base(machine)
@@ -153,7 +149,6 @@ namespace Antmicro.Renode.Peripherals.Timers
             Registers.TimeRawLow.Define(this)
                 .WithValueField(0, 32, FieldMode.Read, valueProviderCallback: _ => (uint)GetTime(), name: "TIMERAWL");
 
-            // There is no debugger to pause for.
             Registers.DebugPause.Define(this, 0x7)
                 .WithValueField(0, 3, name: "DBGPAUSE")
                 .WithReservedBits(3, 29);
@@ -239,9 +234,8 @@ namespace Antmicro.Renode.Peripherals.Timers
             }
         }
 
-        // Tell the alarm how far away its match is. An alarm fires when the
-        // low half of the time equals its target, so a target that has just
-        // gone by is a full wrap of the counter away.
+        // An alarm fires when the low half of the time equals its target, so a
+        // target that has just gone by is a full wrap of the counter away.
         private void Schedule(int alarm)
         {
             if((armed & (1u << alarm)) == 0)
@@ -288,8 +282,7 @@ namespace Antmicro.Renode.Peripherals.Timers
             }
         }
 
-        // Follow the selected count source. With nothing to count, the
-        // counter and the alarms stand still.
+        // With nothing to count, the counter and the alarms stand still.
         private void UpdateRate()
         {
             long frequency;

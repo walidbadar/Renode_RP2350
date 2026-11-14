@@ -4,9 +4,8 @@
 add_subdirectory_ifdef(CONFIG_RP2350_SMP
   ${ZEPHYR_CURRENT_MODULE_DIR}/soc/rp2350 ${CMAKE_CURRENT_BINARY_DIR}/soc/rp2350)
 
-# The boot ROM stand-in, which Renode loads into every machine: without it
-# neither core has anything to start from. It is built with every Arm image
-# for the RP2350 and left next to it, where scripts/rp2350.resc looks.
+# The boot ROM stand-in that Renode loads, built next to every Arm image for
+# the RP2350.
 if(CONFIG_SOC_SERIES_RP2350 AND CONFIG_ARM)
   include(${ZEPHYR_CURRENT_MODULE_DIR}/cmake/bare_metal.cmake)
 

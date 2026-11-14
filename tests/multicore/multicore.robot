@@ -1,9 +1,8 @@
 # Copyright (c) 2026 Muhammad Waleed Badar
 # SPDX-License-Identifier: Apache-2.0
 #
-# The bare-metal sample in samples/multicore. Twister runs this and passes
-# ${ELF}, the image it built; the sample and the boot ROM stand-in are built
-# next to that image.
+# Runs the bare-metal sample in samples/multicore, which is built next to
+# ${ELF}, the image that twister passes.
 
 *** Variables ***
 ${PLATFORM}                   ${CURDIR}/../../scripts/rp2350.resc

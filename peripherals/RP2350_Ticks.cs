@@ -9,10 +9,7 @@ using Antmicro.Renode.Core.Structure.Registers;
 namespace Antmicro.Renode.Peripherals.Miscellaneous
 {
     // TICKS: six tick generators, each dividing clk_ref by a programmable
-    // number of cycles. The timers and the watchdog count these ticks, so a
-    // generator that is left disabled, or given the wrong cycle count, makes
-    // its consumer stand still or run at the wrong rate, as it would on
-    // silicon.
+    // number of cycles. The timers and the watchdog count these ticks.
     public class RP2350_Ticks : RP2350_RegisterBlock
     {
         public RP2350_Ticks(IMachine machine, RP2350_Clocks clocks) : base(machine)
@@ -37,8 +34,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                     .WithChangeCallback((_, __) => TicksChanged?.Invoke());
             }, stepInBytes: GeneratorStride);
 
-            // Cycles left until the next tick. Nothing can make use of it at
-            // the resolution the model runs at.
+            // The cycles left until the next tick are not modelled.
             Registers.Proc0Count.DefineMany(this, NumberOfGenerators, (register, index) =>
             {
                 register
@@ -53,7 +49,6 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             TicksChanged?.Invoke();
         }
 
-        // Tick rate of a generator in Hz, 0 while it is stopped.
         public long GetFrequency(Generator generator)
         {
             var index = (int)generator;
@@ -64,10 +59,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             return clocks.ReferenceFrequency / (long)cycles[index].Value;
         }
 
-        // clk_sys in Hz, for the consumers that can count it instead of ticks.
         public long SystemFrequency => clocks.SystemFrequency;
 
-        // Raised whenever a tick rate may have changed.
         public event Action TicksChanged;
 
         public enum Generator

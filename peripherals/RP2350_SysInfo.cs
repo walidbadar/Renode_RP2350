@@ -7,13 +7,11 @@ using Antmicro.Renode.Core.Structure.Registers;
 
 namespace Antmicro.Renode.Peripherals.Miscellaneous
 {
-    // SYSINFO: what chip this is. Software reads it to tell an RP2350 from
-    // an RP2040, the A package from the B package, and silicon revisions
-    // apart.
+    // SYSINFO: identifies the chip, its package and its silicon revision.
     public class RP2350_SysInfo : RP2350_RegisterBlock
     {
-        // revision: 2 is the A2 stepping, the first one sold.
-        // qfn60: the RP2350A, with 30 GPIOs; otherwise the RP2350B, with 48.
+        // Revision 2 is the A2 stepping. qfn60 selects the RP2350A, with 30
+        // GPIOs, over the RP2350B, with 48.
         public RP2350_SysInfo(IMachine machine, uint revision = 2, bool qfn60 = true) : base(machine)
         {
             Registers.ChipId.Define(this)
@@ -34,12 +32,10 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithFlag(4, FieldMode.Read, name: "GATESIM")
                 .WithReservedBits(5, 27);
 
-            // The revision of the chip's source; the model has none to give.
             Registers.GitRef.Define(this)
                 .WithValueField(0, 32, FieldMode.Read, name: "GITREF_RP2350");
         }
 
-        // Raspberry Pi's JEDEC code, and the RP2350's part number.
         private const uint Manufacturer = 0x493;
         private const uint Part = 0x0004;
 
@@ -52,9 +48,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
         }
     }
 
-    // TBMAN: tells software whether it runs on silicon, on an FPGA or in a
-    // simulation of the chip's logic. The model answers "silicon", so that
-    // software takes the paths it would on a board.
+    // TBMAN: tells software that it runs on silicon and not in a simulation.
     public class RP2350_TBMAN : RP2350_RegisterBlock
     {
         public RP2350_TBMAN(IMachine machine) : base(machine)

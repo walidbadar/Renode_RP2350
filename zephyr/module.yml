@@ -1,10 +1,6 @@
 # Copyright (c) 2026 Muhammad Waleed Badar
 # SPDX-License-Identifier: Apache-2.0
 
-# Makes this repository a Zephyr module. It brings the board in
-# boards/renode/cortex_m33, an SMP variant of the Pico 2 board, what Zephyr
-# lacks to run on both cores of the RP2350 (soc/), the boot ROM stand-in for
-# Renode, and the samples and tests for twister.
 name: renode_rp2350
 build:
   cmake: zephyr
